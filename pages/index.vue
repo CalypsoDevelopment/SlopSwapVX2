@@ -1,5 +1,8 @@
 <template>
-  <SlopSwapTrader />
+  <div>
+    <SlopSwapTopNavBar />
+    <SlopSwapTrader />
+  </div>
 </template>
 
 <script>

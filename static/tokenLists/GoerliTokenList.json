@@ -1,0 +1,9 @@
+[
+  { "ChainID": 5, "TokenName": "Goerli Test Token", "TokenSymbol": "TST", "TokenContract": "0x7af963cF6D228E564e2A0aA0DdBF06210B38615D", "TokenDecimal": 18, "TokenType": "BEP-20" },
+
+  { "ChainID": 5, "TokenName": "USDC Coin", "TokenSymbol": "USDC", "TokenContract": "0x07865c6e87b9f70255377e024ace6630c1eaa37f", "TokenDecimal": 6, "TokenType": "ERC20" },
+
+  { "ChainID": 5, "TokenName": "BD", "TokenSymbol": "BD", "TokenContract": "0x8ef1e2f33c0b248aa46496b68863fde19dc2dced", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 5, "TokenName": "ChainLink Token", "TokenSymbol": "LINK", "TokenContract": "0x326c977e6efc84e512bb9c30f76e30c160ed06fb", "TokenDecimal": 18, "TokenType": "ERC20" }
+]

@@ -13,6 +13,10 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
+    script: [
+      { hid: 'fontawesome', src: 'https://kit.fontawesome.com/3b6ad1dd5e.js', crossorigin: 'anonymous' },
+      { src: 'https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js' }
     ]
   },
 
