@@ -1,78 +1,793 @@
 <template>
-  <b-container>
+  <b-container class="liquidity-container">
     <b-row>
+      <b-col sm="12" md="12" lg="12">
+        <h1 class="text-center main-title">
+          <span class="purple">Slop</span>Swap <span class="purple">Liquidity</span>
+        </h1>
+      </b-col>
       <b-col sm="12" md="12" lg="5">
-        <SlopSwapLiquidityMakerTokenSelect />
+        <SlopSwapLiquidityMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
+        <b-form-input v-model="TokenAPairAmount" class="amounts" :value="TokenAPairAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
       </b-col>
       <b-col sm="12" md="12" lg="2">
-        <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
+        <div class="vert-middle-align">
+          <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
+        </div>
       </b-col>
       <b-col sm="12" md="12" lg="5">
-        <SlopSwapLiquidityTakerTokenSelect />
+        <SlopSwapLiquidityTakerTokenSelect :change-token="TakerToken" :chain="chainID" @changeTakerToken="ChangeBuyToken($event)" @changeTakerTokenBalance="TakerReCheckBalance($event)" />
+        <b-form-input v-model="TokenBPairAmount" class="amounts" :value="TokenBPairAmount" placeholder="0.0" />
       </b-col>
+      <b-col sm="12" md="12" lg="12">
+        <div class="text-center my-5">
+          <b-button-group>
+            <!--<b-button @click="GetTokenReserves()">
+              Get Reserves
+            </b-button>
+            <b-button @click="PairData()">
+              Get Pair Data
+            </b-button>-->
+            <b-button size="lg" class="left-group-btn" @click="quoteAddLiquidity()">
+              Liquidity Quote!
+            </b-button>
+            <b-button size="lg" class="right-group-btn" @click="addLiquidity()">
+              Provide Liquidity!
+            </b-button>
+          </b-button-group>
+        </div>
+      </b-col>
+      <b-col sm="12" md="12" lg="4">
+        <b-list-group class="mt-4 text-center">
+          <b-list-group-item>
+            <b-img
+              :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+              fluid
+              alt="The Amount of SlopSwap Token Reserves"
+              class="maker-token-img"
+            />
+            <span class="feature-title">
+              {{ MakerToken.TokenName }}
+            </span>
+            <br>
+            {{ MakerToken.TokenContract }}
+          </b-list-group-item>
+          <b-list-group-item>
+            <h2 class="secondary-title my-1">
+              Reserves
+            </h2>
+            <b-img
+              :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+            {{ Reserve1 }} {{ MakerToken.TokenSymbol }}
+          </b-list-group-item>
+          <b-list-group-item>
+            <h2 class="secondary-title my-1">
+              Conversion
+            </h2>
+            <b-img
+              :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+            1
+            {{ MakerToken.TokenSymbol }}
+            <i class="fa-solid fa-scale-balanced fa2x icons" />
+            {{ TakerMidPrice }}
+            {{ TakerToken.TokenSymbol }}
+            <b-img
+              :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+          </b-list-group-item>
+        </b-list-group>
+      </b-col>
+      <b-col sm="12" md="12" lg="4">
+        <b-list-group class="mt-4 text-center">
+          <b-list-group-item>
+            <h2 class="secondary-title my-1">
+              Liquidity Pool Contract
+            </h2>
+            <b-img
+              :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img offset1"
+            />
+            <b-img
+              :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+              fluid
+              alt="The Amount of SlopSwap Token Reserves"
+              class="maker-token-img"
+            />
+            <br>
+            {{ PairAddress }}
+          </b-list-group-item>
+          <b-list-group-item v-if="LiquidityAddResult">
+            <div>
+              <span class="feature-title">
+                Amount You Want to Sell
+              </span>
+              <br>
+              {{ LiquidityAddResult.AmountADesired }}
+            </div>
+            <div>
+              <span class="feature-title">
+                Optimal Tokens B
+              </span>
+              <br>
+              {{ LiquidityAddResult.AmountBOpt }}
+            </div>
+            <div>
+              <span class="feature-title">
+                Amount of LP Received
+              </span>
+              <br>
+              {{ LiquidityAddResult.AmountOut }}
+            </div>
+          </b-list-group-item>
+        </b-list-group>
+      </b-col>
+      <b-col sm="12" md="12" lg="4">
+        <b-list-group class="mt-4 text-center">
+          <b-list-group-item>
+            <b-img
+              :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+              fluid
+              alt="The Amount of SlopSwap Token Reserves"
+              class="maker-token-img"
+            />
+            <span class="feature-title">
+              {{ TakerToken.TokenName }}
+            </span>
+            <br>
+            {{ TakerToken.TokenContract }}
+          </b-list-group-item>
+          <b-list-group-item>
+            <h2 class="secondary-title my-1">
+              Reserves
+            </h2>
+            <b-img
+              :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+            {{ Reserve0 }} {{ TakerToken.TokenSymbol }}
+          </b-list-group-item>
+          <b-list-group-item>
+            <h2 class="secondary-title my-1">
+              Conversion
+            </h2>
+            <b-img
+              :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+            1
+            {{ TakerToken.TokenSymbol }}
+            <i class="fa-solid fa-scale-balanced fa2x icons" />
+            {{ MakerMidPrice }}
+            {{ MakerToken.TokenSymbol }}
+            <b-img
+              :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+              fluid
+              alt="Selected token that user wants to trade"
+              class="maker-token-img"
+            />
+          </b-list-group-item>
+          <!--
+          <b-list-group-item>Porta ac consectetur ac</b-list-group-item>
+          <b-list-group-item>Vestibulum at eros</b-list-group-item>
+          -->
+        </b-list-group>
+      </b-col>
+      <b-col>
+        <div v-if="TXreceipt">
+          {{ TXreceipt }}
+        </div>
+      </b-col>
+      <!--<b-col sm="12" md="12" lg="12">
+      </b-col>
+      <b-col sm="12" md="12" lg="12">
+      </b-col>-->
     </b-row>
   </b-container>
 </template>
 <script>
-import { ChainId } from '@uniswap/sdk'
+import { ChainId, Fetcher, Route, Token, Pair, TokenAmount } from '@uniswap/sdk'
 import detectEthereumProvider from '@metamask/detect-provider'
 import SlopSwapLiquidityMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
 import SlopSwapLiquidityTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
-// const axios = require('axios')
+const axios = require('axios')
 const ethers = require('ethers')
-// const qs = require('qs')
+const qs = require('qs')
 // const BigNumber = require('big-number')
-// const ROUTER = require('~/static/artifacts/SlopSwapRouter.json')
-// const PAIR = require('~/static/artifacts/SlopSwapPair.json')
-// const ERC20 = require('~/static/artifacts/IERC20.json')
+const ROUTER = require('~/static/artifacts/SlopSwapRouter.json')
+const PAIR = require('~/static/artifacts/SlopSwapPair.json')
+const ERC20 = require('~/static/artifacts/IERC20.json')
+const FACTORY = require('~/static/artifacts/SlopSwapFactory.json')
+
 export default {
   name: 'SlopSwapLiquidityInterface',
-  components: { SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect },
+  components: {
+    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect
+  },
   data () {
     return {
       MainnetFactory: '0x7914BfaC79d35B1b521268cE4C431F112f4608fb',
       MainnetRouter: '0x613EBe638AF0D7F412A328933F60399e3c410328',
       MakerToken: { ChainId: 56, TokenName: 'Wrapped BNB', TokenSymbol: 'WBNB', TokenContract: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', TokenDecimal: 18, TokenType: 'ERC20', BrandPrimary: '#f0b90b' },
-      sellAmount: null,
+      TokenAPairAmount: null,
       TakerToken: { ChainId: 56, TokenName: 'PancakeSwap Token (Cake)', TokenSymbol: 'Cake', TokenContract: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', TokenDecimal: 18, TokenType: 'ERC20', BrandPrimary: '#d1884f' },
-      buyAmount: null,
-      chainID: ChainId.MAINNET,
+      TokenBPairAmount: null,
       WETH: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-      SlippageSelected: 50,
+      pair: null,
+      chainID: ChainId.MAINNET,
+      SlippageSelected: 0.04,
       SlippageOptions: [
-        { value: 50, text: 'Slippage' },
-        { value: 100, text: '1% Slippage' },
-        { value: 200, text: '2% Slippage' },
-        { value: 300, text: '3% Slippage' },
-        { value: 400, text: '4% Slippage' },
-        { value: 500, text: '5% Slippage' },
-        { value: 600, text: '6% Slippage' },
-        { value: 700, text: '7% Slippage' },
-        { value: 800, text: '8% Slippage' },
-        { value: 900, text: '9% Slippage' },
-        { value: 1000, text: '10% Slippage' },
-        { value: 1100, text: '11% Slippage' },
-        { value: 1200, text: '12% Slippage' },
-        { value: 1300, text: '13% Slippage' },
-        { value: 1400, text: '14% Slippage' },
-        { value: 1500, text: '15% Slippage' },
-        { value: 1600, text: '16% Slippage' },
-        { value: 1700, text: '17% Slippage' },
-        { value: 1800, text: '18% Slippage' },
-        { value: 1900, text: '19% Slippage' },
-        { value: 2000, text: '20% Slippage' },
-        { value: 2100, text: '21% Slippage' },
-        { value: 2200, text: '22% Slippage' },
-        { value: 2300, text: '23% Slippage' },
-        { value: 2400, text: '24% Slippage' },
-        { value: 2500, text: '25% Slippage' }
-      ]
+        { value: 0.00, text: 'Slippage' },
+        { value: 0.01, text: '1% Slippage' },
+        { value: 0.02, text: '2% Slippage' },
+        { value: 0.03, text: '3% Slippage' },
+        { value: 0.04, text: '4% Slippage' },
+        { value: 0.05, text: '5% Slippage' },
+        { value: 0.06, text: '6% Slippage' },
+        { value: 0.07, text: '7% Slippage' },
+        { value: 0.08, text: '8% Slippage' },
+        { value: 0.09, text: '9% Slippage' },
+        { value: 0.10, text: '10% Slippage' },
+        { value: 0.11, text: '11% Slippage' },
+        { value: 0.12, text: '12% Slippage' },
+        { value: 0.13, text: '13% Slippage' },
+        { value: 0.14, text: '14% Slippage' },
+        { value: 0.15, text: '15% Slippage' },
+        { value: 0.16, text: '16% Slippage' },
+        { value: 0.17, text: '17% Slippage' },
+        { value: 0.18, text: '18% Slippage' },
+        { value: 0.19, text: '19% Slippage' },
+        { value: 0.20, text: '20% Slippage' },
+        { value: 0.21, text: '21% Slippage' },
+        { value: 0.22, text: '22% Slippage' },
+        { value: 0.23, text: '23% Slippage' },
+        { value: 0.24, text: '24% Slippage' },
+        { value: 0.25, text: '25% Slippage' }
+      ],
+      TXreceipt: null,
+      MakerMidPrice: null,
+      TakerMidPrice: null,
+      tokenA: null,
+      tokenB: null,
+      reserves: null,
+      CreatedPair: null,
+      Reserve0: null,
+      Reserve1: null,
+      PairAddress: null,
+      provider: null,
+      signer: null,
+      account: null,
+      router: null,
+      factory: null,
+      LiquidityAddResult: null,
+      EstimatedGasPrice: null,
+      BuyTokenAmount: null,
+      GasPrice: null,
+      newPair: null
+    }
+  },
+  watch: {
+    TakerMidPrice (value) {
+      this.GetTokenReserves()
+    },
+    MakerToken (value) {
+      this.PairData()
+      // this.GetPairMidPrice()
+      this.ChangePairMidPrice()
+    },
+    TakerToken (value) {
+      this.PairData()
+      this.GetPairMidPrice()
+    },
+    TokenAPairAmount (value) {
+      this.PairData()
+      this.GetPairMidPrice()
+    },
+    TokenBPairAmount (value) {
+      this.MakerPriceCheck()
     }
   },
   beforeMount () {
     this.OnLoadCheckWalletStatus()
+    this.PairData()
+    this.GetPairMidPrice()
   },
   methods: {
+    async addLiquidity () {
+      // Declare Maker Token for Uniswap SDK2
+      const TokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
+      // Declare Taker Token for Uniswap SDK2
+      const TokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
+      // alert('Token A: ' + TokenA.name)
+      // alert('Token B: ' + TokenB.name)
+
+      const pairAddress = Pair.getAddress(TokenA, TokenB)
+      const PairContract = new ethers.Contract(pairAddress, PAIR.abi, this.signer)
+      this.newPair = PairContract
+      const reservesReq = await this.newPair.getReserves()
+      const reserves = [
+        /* use pairAddress to fetch reserves here */
+        reservesReq[0], reservesReq[1]
+      ]
+      // alert('Token Decimal: ' + this.MakerToken.TokenDecimal)
+      const [reserve0, reserve1] = reserves
+
+      const tokens = [TokenA, TokenB]
+      const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]]
+
+      const pair = new Pair(new TokenAmount(token0, reserve0), new TokenAmount(token1, reserve1))
+      alert(pair)
+
+      // Handle Slippage Tollerance
+      // const slippageTolerancePercent = new Percent(String(this.SlippageSelected), '100') // 50 bips, or 0.50%
+      // alert('Slippage Tollerance: ' + slippageTolerancePercent.toSignificant(2) + '%')
+
+      const AmountAToWei = ethers.utils.parseUnits(String(this.TokenAPairAmount), this.MakerToken.TokenDecimal)
+      const AmountBToWei = ethers.utils.parseUnits(String(this.TokenBPairAmount), this.TakerToken.TokenDecimal)
+
+      // const OnChainQuote = await this.router.quote(String(AmountAToWei), String(reserves[0]), String(reserves[1]))
+      // alert(OnChainQuote)
+      const AmountAToString = AmountAToWei.toString()
+      const amountAReplacement = '1'
+      const amountAReplace = AmountAToString.slice(0, -1) + amountAReplacement
+      // alert(amountAReplace)
+
+      const AmountBToString = AmountBToWei.toString()
+      const amountBReplacement = '1'
+      const amountBReplace = AmountBToString.slice(0, -1) + amountBReplacement
+      // alert(amountBReplace)
+
+      const amountIn1 = amountAReplace
+      const amountIn2 = amountBReplace
+      // alert('Amount1 In: ' + amountIn1)
+      // alert('Amount2 In: ' + amountIn2)
+
+      const valueInA = this.TokenAPairAmount
+      const numA = parseFloat(valueInA)
+      const valA = numA - (numA * this.SlippageSelected)
+
+      const valueInB = this.TokenBPairAmount
+      const numB = parseFloat(valueInB)
+      const valB = numB - (numB * this.SlippageSelected)
+
+      const preAmount1Min = ethers.utils.parseUnits(String(valA), this.MakerToken.TokenDecimal)
+      const preAmount2Min = ethers.utils.parseUnits(String(valB), this.TakerToken.TokenDecimal)
+
+      const AmountCToString = preAmount1Min.toString()
+      const amountCReplacement = '1'
+      const amount1Min = AmountCToString.slice(0, -1) + amountCReplacement
+      // alert(amount1Min)
+
+      const AmountDToString = preAmount2Min.toString()
+      const amountDReplacement = '1'
+      const amount2Min = AmountDToString.slice(0, -1) + amountDReplacement
+      // alert(amount2Min)
+
+      // alert('Amount Min. A: ' + amount1Min)
+      // alert('Amount Min. B: ' + amount2Min)
+      const time = Math.floor(Date.now() / 1000) + 200000
+      const deadline = ethers.BigNumber.from(time)
+      // alert('Deadline: ' + deadline)
+
+      const token1Instance = new ethers.Contract(String(this.MakerToken.TokenContract), ERC20.abi, this.signer)
+      const token2Instance = new ethers.Contract(String(this.TakerToken.TokenContract), ERC20.abi, this.signer)
+
+      await token1Instance.approve(this.MainnetRouter, '2511111111111111111111111111111')
+      await token2Instance.approve(this.MainnetRouter, '2511111111111111111111111111111')
+
+      alert(
+        String(this.MakerToken.TokenContract),
+        String(this.TakerToken.TokenContract),
+        String(amountIn1),
+        String(amountIn2),
+        String(amount1Min),
+        String(amount2Min),
+        this.account,
+        deadline)
+      if (this.MakerToken.TokenContract === this.WETH) {
+        // Eth + Token
+        const tx = await this.router.addLiquidityETH(
+          String(this.TakerToken.TokenContract),
+          String(amountIn2),
+          String(amount2Min),
+          String(amount1Min),
+          String(this.account),
+          String(deadline),
+          {
+            value: String(amountIn1),
+            gasPrice: this.EstimatedGasPrice,
+            gasLimit: '550000'
+          }
+        )
+        const receipt = await tx.wait()
+        this.TXReceipt = receipt
+      } else if (this.TakerToken.TokenContract === this.WETH) {
+        // Token + Eth
+        const tx = await this.router.addLiquidityETH(
+          String(this.MakerToken.TokenContract),
+          String(amountIn1),
+          String(amount1Min),
+          String(amount2Min),
+          String(this.account),
+          String(deadline),
+          {
+            value: String(amountIn2),
+            gasPrice: this.EstimatedGasPrice,
+            gasLimit: '550000'
+          }
+        )
+        const receipt = await tx.wait()
+        this.TXReceipt = receipt
+      } else {
+        // Token + Token
+        const tx = await this.router.addLiquidity(
+          String(this.MakerToken.TokenContract),
+          String(this.TakerToken.TokenContract),
+          String(amountIn1),
+          String(amountIn2),
+          String(amount1Min),
+          String(amount2Min),
+          String(this.account),
+          String(deadline),
+          {
+            gasPrice: this.EstimatedGasPrice,
+            gasLimit: '550000'
+          }
+        )
+        const receipt = await tx.wait()
+        this.TXReceipt = receipt
+      }
+    },
+    // Function used to remove Liquidity from any pair of tokens or token-AUT
+    // To work correctly, there needs to be 9 arguments:
+    //    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
+    //    `address2` - An Ethereum address of the coin to recieve (either a token or AUT)
+    //    `liquidity_tokens` - A float or similar number representing the value of liquidity tokens you will burn to get tokens back
+    //    `amount1Min` - A float or similar number representing the minimum of address1's coin to recieve
+    //    `amount2Min` - A float or similar number representing the minimum of address2's coin to recieve
+    //    `routerContract` - The router contract to carry out this trade
+    //    `accountAddress` - An Ethereum address of the current user's account
+    //    `provider` - The current provider
+    //    `signer` - The current signer
+    async removeLiquidity (
+      address1,
+      address2,
+      LiquidityTokens,
+      amount1min,
+      amount2min,
+      routerContract,
+      account,
+      signer,
+      factory
+    ) {
+      const liquidity = ethers.utils.parseEther(LiquidityTokens.toString())
+
+      const amount1Min = ethers.utils.parseEther(amount1min.toString())
+      const amount2Min = ethers.utils.parseEther(amount2min.toString())
+
+      const time = Math.floor(Date.now() / 1000) + 200000
+      const deadline = ethers.BigNumber.from(time)
+
+      const pairAddress = await factory.getPair(address1, address2)
+      const pair = new ethers.Contract(pairAddress, PAIR.abi, signer)
+
+      await pair.approve(routerContract.address, liquidity)
+
+      alert([
+        address1,
+        address2,
+        Number(liquidity),
+        Number(amount1Min),
+        Number(amount2Min),
+        this.account,
+        deadline
+      ])
+
+      if (address1 === this.WETH) {
+        // Eth + Token
+        await routerContract.removeLiquidityETH(
+          address2,
+          liquidity,
+          amount2Min,
+          amount1Min,
+          this.account,
+          deadline
+        )
+      } else if (address2 === this.WETH) {
+        // Token + Eth
+        await routerContract.removeLiquidityETH(
+          address1,
+          liquidity,
+          amount1Min,
+          amount2Min,
+          this.account,
+          deadline
+        )
+      } else {
+        // Token + Token
+        await routerContract.removeLiquidity(
+          address1,
+          address2,
+          liquidity,
+          amount1Min,
+          amount2Min,
+          this.account,
+          deadline
+        )
+      }
+    },
+    // This function returns the conversion rate between two token addresses
+    //    `address1` - An Ethereum address of the token to swaped from (either a token or AUT)
+    //    `address2` - An Ethereum address of the token to swaped to (either a token or AUT)
+    //    `amountIn` - Amount of the token at address 1 to be swaped from
+    //    `routerContract` - The router contract to carry out this swap
+    async getAmountOut (
+      address1,
+      address2,
+      amountIn,
+      routerContract
+    ) {
+      try {
+        const ValuesOut = await this.router.getAmountsOut(
+          ethers.utils.parseEther(amountIn),
+          [address1, address2]
+        )
+        const AmountOut = ethers.utils.formatEther(ValuesOut[1])
+        return Number(AmountOut)
+      } catch {
+        return false
+      }
+    },
+    // This function calls the pair contract to fetch the reserves stored in a the liquidity pool between the token of address1 and the token
+    // of address2. Some extra logic was needed to make sure that the results were returned in the correct order, as
+    // `pair.getReserves()` would always return the reserves in the same order regardless of which order the addresses were.
+    //    `address1` - An Ethereum address of the token to trade from (either a ERC20 token or AUT)
+    //    `address2` - An Ethereum address of the token to trade to (either a ERC20 token or AUT)
+    //    `pair` - The pair contract for the two tokens
+    async fetchReserves (address1, address2, pair) {
+      try {
+        const reservesRaw = await pair.getReserves()
+        const results = [
+          Number(ethers.utils.formatEther(reservesRaw[0])),
+          Number(ethers.utils.formatEther(reservesRaw[1]))
+        ]
+
+        return [
+          (await pair.token0()) === address1 ? results[0] : results[1],
+          (await pair.token1()) === address2 ? results[1] : results[0]
+        ]
+      } catch (err) {
+        alert('no reserves yet')
+        return [0, 0]
+      }
+    },
+    // Function used to get a quote of the liquidity addition
+    //    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
+    //    `address2` - An Ethereum address of the coin to recieve (either a token or AUT)
+    //    `amountA_desired` - The prefered value of the first token that the user would like to deploy as liquidity
+    //    `amountB_desired` - The prefered value of the second token that the user would like to deploy as liquidity
+    //    `factory` - The current factory
+    //    `signer` - The current signer
+
+    async quoteAddLiquidity () {
+      const address1 = this.MakerToken.TokenContract
+      const address2 = this.TakerToken.TokenContract
+
+      const amountADesired = this.TokenAPairAmount
+      const amountBDesired = this.TokenBPairAmount
+
+      const pairAddress = await this.factory.getPair(address1, address2)
+      const pair = new ethers.Contract(pairAddress, PAIR.abi, this.signer)
+
+      const reservesRaw = await this.fetchReserves(address1, address2, pair) // Returns the reserves already formated as ethers
+      const reserveA = reservesRaw[0]
+      const reserveB = reservesRaw[1]
+
+      const quote = (amount1, reserve1, reserve2) => {
+        const amount2 = amount1 * (reserve2 / reserve1)
+        const amountOut = Math.sqrt(amount2 * amount1)
+        return [amount2, amountOut]
+      }
+
+      if (reserveA === 0 && reserveB === 0) {
+        const amountOut = Math.sqrt(reserveA * reserveB)
+        this.LiquidityAddResult = {
+          AmountADesired: amountADesired.toString(),
+          AmountBDesired: amountBDesired.toString(),
+          AmountOut: amountOut.toString()
+        }
+        // alert(this.LiquidityAddResult)
+      } else {
+        const [amountBOptimal, amountOut] = quote(amountADesired, reserveA, reserveB)
+        if (amountBOptimal <= amountBDesired) {
+          this.LiquidityAddResult = {
+            AmountADesired: amountADesired.toString(),
+            AmountBOpt: amountBOptimal.toString(),
+            AmountOut: amountOut.toString()
+          }
+          // alert(this.LiquidityAddResult)
+        } else {
+          const [amountAOptimal, amountOut] = quote(
+            amountBDesired,
+            reserveB,
+            reserveA
+          )
+          this.LiquidityAddResult = {
+            AmountAOpt: amountAOptimal.toString(),
+            AmountBDesired: amountBDesired.toString(),
+            AmountOut: amountOut.toString()
+          }
+          // alert(this.LiquidityAddResult)
+        }
+      }
+    },
+    async PairData () {
+      const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
+      this.tokenA = tokenA
+      // alert(tokenA.name)
+      const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
+      this.tokenB = tokenB
+      // alert(tokenB.name)
+
+      const pairAddress = Pair.getAddress(tokenA, tokenB)
+      this.PairAddress = pairAddress
+      // alert('Pair Address: ' + pairAddress)
+      const PairInstance = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
+      const reserve = await PairInstance.getReserves()
+      // alert('Reserves: ' + reserves[0])
+      const reserves = [reserve[0], reserve[1]]
+      const [reserve0, reserve1] = reserves
+      this.reserves = reserves
+      const tokens = [tokenA, tokenB]
+      const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]]
+
+      const pair = new Pair(new TokenAmount(token0, reserve0), new TokenAmount(token1, reserve1))
+      this.CreatedPair = pair
+    },
+    async GetTokenReserves () {
+      const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
+      this.tokenA = tokenA
+      // alert(tokenA.name)
+      const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
+      this.tokenB = tokenB
+      // alert(tokenB.name)
+
+      const pairAddress = Pair.getAddress(tokenA, tokenB)
+      // alert('Pair Address: ' + pairAddress)
+      const PairInstance = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
+      const reserve = await PairInstance.getReserves()
+      // alert('Reserves: ' + reserves[0])
+      const reserves = [reserve[0], reserve[1]]
+      const [reserve0, reserve1] = reserves
+      this.reserves = reserves
+      const tokens = [tokenA, tokenB]
+      const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]]
+
+      const pair = new Pair(new TokenAmount(token0, reserve0), new TokenAmount(token1, reserve1))
+      this.CreatedPair = pair
+      this.Reserve0 = ethers.utils.formatEther(reserve[0])
+      this.Reserve1 = ethers.utils.formatEther(reserve[1])
+    },
+    async GetPairMidPrice () {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const pair = await Fetcher.fetchPairData(
+        this.tokenA,
+        this.tokenB,
+        provider
+      )
+      // alert(pair)
+      const route = new Route([pair], this.tokenA)
+      // alert('Route: ' + route)
+      // alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
+      // alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
+      this.TakerMidPrice = route.midPrice.toSignificant(8)
+      this.MakerMidPrice = route.midPrice.invert().toSignificant(10)
+    },
+    async ChangePairMidPrice () {
+      this.TakerMidPrice = null
+      // const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
+      this.tokenA = tokenA
+      alert(tokenA.name)
+      const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
+      this.tokenB = tokenB
+      alert(tokenB.name)
+
+      const pairAddress = Pair.getAddress(tokenA, tokenB)
+      // alert('Pair Address: ' + pairAddress)
+      const PairInstance = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
+      const reserve = await PairInstance.getReserves()
+      // alert('Reserves: ' + reserves[0])
+      const reserves = [reserve[0], reserve[1]]
+      const [reserve0, reserve1] = reserves
+      // alert(reserves)
+      const tokens = [tokenA, tokenB]
+      const [token0, token1] = tokens[0].sortsBefore(tokens[1]) ? tokens : [tokens[1], tokens[0]]
+
+      const pair = new Pair(new TokenAmount(token0, reserve0), new TokenAmount(token1, reserve1))
+      this.CreatedPair = pair
+      const route = new Route([pair], tokenA)
+      // alert(route)
+      alert('Route: ' + route)
+      alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
+      alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
+      this.TakerMidPrice = route.midPrice.toSignificant(10)
+    },
+    async checkBalance () {
+      // Define Token A & B
+      // Establish the connection to the User wallet & query Token A (Primary Liquidity Token) balance within the wallet
+      // A Web3Provider wraps a standard Web3 provider, which ism
+      // what MetaMask injects as window.ethereum into each page
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+      // MetaMask requires requesting permission to connect users accounts
+      await provider.send('eth_requestAccounts', [])
+
+      // The MetaMask plugin also allows signing transactions to
+      // send ether and pay to change state within the blockchain.
+      // For this, you need the account signer...
+      // const signer = provider.getSigner()
+      // alert('Signer: ' + signer)
+
+      const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // this.UserAccount = account.address
+      // alert('Wallet User: ' + account)
+      // alert('Before Token Symbol')
+      this.chainID = provider.network.chainId
+      this.BlockchainRadioSelected = provider.network.chainId
+
+      if (this.sellToken.TokenSymbol === 'WBNB') {
+        // Get Token Balance through Metamask
+        const sellTokenBalance = await provider.getBalance(String(account))
+        // alert(TokenABalance)
+        const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
+        // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
+
+        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + this.sellToken.TokenSymbol
+      } else {
+        const BEP20sellToken = new ethers.Contract(
+          this.sellToken.TokenContract, [
+            'function name() view returns (string)',
+            'function symbol() view returns (string)',
+            'function balanceOf(address) view returns (uint)'
+          ],
+          provider
+        )
+        const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
+        // alert(TokenAbalance)
+        const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), this.sellToken.TokenDecimal)
+        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + this.sellToken.TokenSymbol
+      }
+      const BEP20BuyToken = new ethers.Contract(
+        this.buyToken.TokenContract, [
+          'function name() view returns (string)',
+          'function symbol() view returns (string)',
+          'function balanceOf(address) view returns (uint)'
+        ],
+        provider
+      )
+
+      const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
+      // alert(buyTokenbalance)
+      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), this.buyToken.TokenDecimal)
+      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + this.buyToken.TokenSymbol
+    },
     async OnLoadCheckWalletStatus () {
       const provider = await detectEthereumProvider()
       if (provider) {
@@ -86,6 +801,11 @@ export default {
         const accounts = await provider.listAccounts()
         this.currentAccountAddress = accounts[0]
         this.account = accounts[0]
+
+        const FactoryContractInstance = new ethers.Contract(this.MainnetFactory, FACTORY.abi, this.signer)
+        this.factory = FactoryContractInstance
+        const RouterContractInstance = new ethers.Contract(this.MainnetRouter, ROUTER.abi, this.signer)
+        this.router = RouterContractInstance
         if (this.account !== null) {
           this.loggedIn = true
         }
@@ -96,10 +816,267 @@ export default {
       if (this.account !== null) {
         this.loggedIn = true
       }
+    },
+    SlopSwapMidPriceQuote () {
+      const SlopSwapTradeQuote = this.TokenAPairAmount * this.TakerMidPrice
+      this.TokenBPairAmount = SlopSwapTradeQuote
+    },
+    async MakerPriceCheck () {
+      const priceFormatter = ethers.utils.parseUnits(String(this.TokenAPairAmount), this.MakerToken.TokenDecimal)
+      // alert(priceFormatter)
+      /* const QuoteReview = `
+      Buying ${this.buyToken.TokenSymbol} Contract: ${this.buyToken.TokenContract}  using ${this.sellToken.TokenSymbol} in the amount of
+      ${priceFormatter}
+      =================`
+      alert(QuoteReview) */
+
+      const params = {
+        // Not all token symbols are supported. The address of the token can be used instead.
+        sellToken: this.MakerToken.TokenContract,
+        buyToken: this.TakerToken.TokenContract,
+        // Note that the DAI token uses 18 decimal places, so `sellAmount` is `100 * 10^18`.
+        sellAmount: String(priceFormatter)
+      }
+
+      const response = await axios.get(
+        `https://bsc.api.0x.org/swap/v1/quote?${qs.stringify(params)}`
+      )
+      this.quote = response
+      // alert(this.quote)
+      // const BuyAmountWei = this.quote.data.buyAmount
+      this.BuyTokenAmount = ethers.utils.formatUnits(String(this.quote.data.buyAmount), this.buyToken.TokenDecimal)
+      this.EstimatedGasPrice = this.quote.data.estimatedGas
+      this.GasPrice = this.quote.data.gasPrice
+    },
+    ChangeSellToken (MakerToken) {
+      this.MakerToken = MakerToken
+      /* this.showAlert('Token Infromation', '<div class="sweet-alert">The Sell Token has been changed to <br><strong>ChainID:</strong> ' + this.sellToken.ChainID + '<br><strong>Sell Token Name:</strong>  ' + this.sellToken.TokenName + ' <br><strong>Sell Token Symbol:</strong> ' + this.sellToken.TokenSymbol + '<br><strong>Sell Token Contract:</strong> ' + this.sellToken.TokenContract + '<br><strong>Sell Token Decimal:</strong> ' + this.sellToken.TokenDecimal + '<br><strong>Sell Token Type:</strong> ' + this.buyToken.TokenType + '</div>') */
+      this.TokenAPairAmount = null
+      this.TokenBPairAmount = null
+      this.TokenBPairAmount = null
+      this.BuyTokenAmount = null
+      this.ChangePairMidPrice()
+    },
+    ChangeBuyToken (TakerToken) {
+      this.TakerToken = TakerToken
+      /* this.showAlert('Token Infromation', '<div class="sweet-alert">The Buy Token has been changed to <br><strong>ChainID:</strong> ' + this.buyToken.ChainID + '<br><strong>Buy Token Name:</strong> ' + this.buyToken.TokenName + '<br><strong>Buy Token Symbol:</strong> ' + this.buyToken.TokenSymbol + '<br><strong>Buy Token Contract:</strong> ' + this.buyToken.TokenContract + '<br><strong>Buy Token Decimal:</strong> ' + this.buyToken.TokenDecimal + '<br><strong>Buy Token Type:</strong> ' + this.buyToken.TokenType + '</div>') */
+      this.TokenAPairAmount = null
+      this.TokenBPairAmount = null
+      this.TokenBPairAmount = null
+      this.BuyTokenAmount = null
+      this.ChangePairMidPrice()
+    },
+    async MakerReCheckBalance (sellTok) {
+      // Define Token A & B
+      // Establish the connection to the User wallet & query Token A (Primary Liquidity Token) balance within the wallet
+      // A Web3Provider wraps a standard Web3 provider, which ism
+      // what MetaMask injects as window.ethereum into each page
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+      // MetaMask requires requesting permission to connect users accounts
+      await provider.send('eth_requestAccounts', [])
+
+      // The MetaMask plugin also allows signing transactions to
+      // send ether and pay to change state within the blockchain.
+      // For this, you need the account signer...
+      // const signer = provider.getSigner()
+      // alert('Signer: ' + signer)
+
+      const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // this.UserAccount = account.address
+      // alert('Wallet User: ' + account)
+      // alert('Before Token Symbol')
+
+      if (sellTok.TokenSymbol === 'WBNB') {
+        // Get Token Balance through Metamask
+        const sellTokenBalance = await provider.getBalance(String(account))
+        // alert(TokenABalance)
+        const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
+        // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
+
+        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + sellTok.TokenSymbol
+      } else {
+        const BEP20sellToken = new ethers.Contract(
+          sellTok.TokenContract, [
+            'function name() view returns (string)',
+            'function symbol() view returns (string)',
+            'function balanceOf(address) view returns (uint)'
+          ],
+          provider
+        )
+        const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
+        // alert(TokenAbalance)
+        const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), sellTok.TokenDecimal)
+        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+      }
+      const BEP20BuyToken = new ethers.Contract(
+        sellTok.TokenContract, [
+          'function name() view returns (string)',
+          'function symbol() view returns (string)',
+          'function balanceOf(address) view returns (uint)'
+        ],
+        provider
+      )
+
+      const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
+      // alert(buyTokenbalance)
+      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), sellTok.TokenDecimal)
+      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+    },
+    async TakerReCheckBalance (buyTok) {
+      // Define Token A & B
+      // Establish the connection to the User wallet & query Token A (Primary Liquidity Token) balance within the wallet
+      // A Web3Provider wraps a standard Web3 provider, which ism
+      // what MetaMask injects as window.ethereum into each page
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+      // MetaMask requires requesting permission to connect users accounts
+      await provider.send('eth_requestAccounts', [])
+
+      // The MetaMask plugin also allows signing transactions to
+      // send ether and pay to change state within the blockchain.
+      // For this, you need the account signer...
+      // const signer = provider.getSigner()
+      // alert('Signer: ' + signer)
+
+      const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // this.UserAccount = account.address
+      // alert('Wallet User: ' + account)
+      // alert('Before Token Symbol')
+      if (buyTok.TokenSymbol === 'WBNB') {
+        // Get Token Balance through Metamask
+        const buyTokenBalance = await provider.getBalance(String(account))
+        // alert(TokenABalance)
+        const ReturnBuyTokenBalance = ethers.utils.formatEther(String(buyTokenBalance))
+        // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
+
+        this.BuyTokenUserBalance = ReturnBuyTokenBalance.substring(0, 6) + ' ' + buyTok.TokenSymbol
+      } else {
+        const BEP20BuyToken = new ethers.Contract(
+          buyTok.TokenContract, [
+            'function name() view returns (string)',
+            'function symbol() view returns (string)',
+            'function balanceOf(address) view returns (uint)'
+          ],
+          provider
+        )
+
+        const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
+        // alert(buyTokenbalance)
+        const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), buyTok.TokenDecimal)
+        this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + buyTok.TokenSymbol
+      }
     }
   }
 }
 </script>
 <style scoped>
-
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,2000,3000,4000,5000,6000,7000,8000,9001,2001,3001,4001,5001,6001,7001,8001,900&display=swap');
+.offset1 {
+  position: relative;
+  right: -10px;
+}
+.main-title {
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  font-size: 2.9rem;
+  font-family: 'Fredoka One', sans-serif;
+}
+.purple {
+  color: #5d3d42;
+}
+.white {
+  color: #FFFFFF;
+}
+.main-title {
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  font-size: 2.9rem;
+  font-family: 'Fredoka One', cursive;
+}
+.blue-gray {
+  color: #17a2b8;
+}
+.red {
+  color: #c1272d;
+}
+.custom-select {
+    display: inline-block;
+    width: 100%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0rem 0rem 0rem 0rem;
+    margin-top: 0rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    vertical-align: middle;
+    /*background: #fff url(data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e) right 0.75rem center/8px 10px no-repeat*/
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.slippage-selector.custom-select{
+  background-color: transparent;
+  border: transparent;
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Fredoka One', cursive;
+  height: 26px;
+}
+.liquidity-container {
+  font-variant-caps: all-small-caps;
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-decoration: none;
+}
+.vert-middle-align {
+  margin-top: 6rem;
+  margin-bottom: auto;
+}
+.feature-title {
+  font-variant-caps: all-small-caps;
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #c1272d;
+}
+.secondary-title {
+  font-variant-caps: all-small-caps;
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #c1272d;
+  text-decoration: none;
+}
+.icons {
+  color: #c1272d;
+}
+.amounts {
+  border-radius: 4rem;
+}
+.maker-token-img {
+  max-height: 32px;
+}
+.slippage-selector {
+  border-radius: 4rem;
+}
+.left-group-btn {
+  border-top-left-radius: 4rem;
+  border-bottom-left-radius: 4rem;
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+  background-color: #5d3d42;
+}
+.right-group-btn {
+  border-top-right-radius: 4rem;
+  border-bottom-right-radius: 4rem;
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+  background-color: #5d3d42
+}
 </style>

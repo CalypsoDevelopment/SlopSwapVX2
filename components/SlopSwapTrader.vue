@@ -1,21 +1,46 @@
 <template>
   <b-container>
     <b-row>
-      <b-col sm="12" md="12" lg="5">
-        <SlopSwapMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
-        <b-form-input v-model="sellAmount" class="amounts" :value="sellAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
-      </b-col>
-      <b-col sm="12" md="12" lg="2">
+      <b-col sm="12" medium="12" lg="12">
         <div class="mt-5">
-          <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
+          <b-nav class="config-btns">
+            <b-nav-item active>
+              <b-button v-b-popover.hover.top="'Trade settings and configuration options'" v-b-toggle.TXSettingsConfig pill>
+                <i class="fa-solid fa-gears" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTradeConfiguration />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-popover.hover.top="'Trade transaction history specifications'" v-b-toggle.TXHistory pill>
+                <i class="fa-solid fa-clock-rotate-left" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTXHistory />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-popover.hover.top="'Token pair trading chart'" v-b-toggle.TradingPairGraph pill>
+                <i class="fa-solid fa-chart-area" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapPairGraphSidebar />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-popover.hover.top="'Trading pair data &amp; information'" v-b-toggle.TradingPairGraph pill>
+                <i class="fa-solid fa-memo-circle-info" style="color: #3E3D40;" />
+              </b-button>
+            </b-nav-item>
+            <b-nav-item>
+              <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes. We include a slippage percentage option because of the the dynamic price swings in crypto. The price of an asset can fluctuate often depending on trade volume and activity.'" class="slippage-selector slippage-title" :options="SlippageOptions" />
+            </b-nav-item>
+          </b-nav>
         </div>
       </b-col>
-      <b-col sm="12" md="12" lg="5">
-        <SlopSwapTakerTokenSelect :change-token="TakerToken" :chain="chainID" @changeTakerToken="ChangeBuyToken($event)" @changeTakerTokenBalance="TakerReCheckBalance($event)" />
-        <b-form-input v-model="SlopQuoteAmount" class="amounts" :value="SlopQuoteAmount" placeholder="0.0" />
-      </b-col>
-      <b-col sm="12" md="12" lg="12">
-        <div class="text-center my-5">
+      <b-col sm="12" medium="12" lg="12">
+        <div>
+          <h1 class="main-title">
+            Slop<span class="red">Swap</span> Trading
+          </h1>
+        </div>
+
+        <div v-b-popover.hover.top="'The one to one price of the tokens pair'" class="text-center one-to-one-container mt-2">
           <b-img
             :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
             fluid
@@ -35,17 +60,25 @@
           />
         </div>
       </b-col>
+      <b-col sm="12" md="12" lg="5">
+        <SlopSwapMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
+        <b-form-input v-model="sellAmount" class="amounts" :value="sellAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
+      </b-col>
+      <b-col sm="12" md="12" lg="2">
+        <div class="mt-5">
+          <b-img src="~/assets/img/page-graphics/trade2.svg" class="center-trade-char" fluid alt="Responsive image" />
+          <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
+        </div>
+      </b-col>
+      <b-col sm="12" md="12" lg="5">
+        <SlopSwapTakerTokenSelect :change-token="TakerToken" :chain="chainID" @changeTakerToken="ChangeBuyToken($event)" @changeTakerTokenBalance="TakerReCheckBalance($event)" />
+        <b-form-input v-model="SlopQuoteAmount" class="amounts" :value="SlopQuoteAmount" placeholder="0.0" />
+      </b-col>
       <b-col sm="12" md="12" lg="12">
-        <div class="text-center my-5">
+        <div class="text-center my-2">
           <b-button-group>
-            <!-- <b-button @click="PairData()">
-              Get PairData()
-            </b-button>
-            <b-button @click="GetPairMidPrice()">
-              Get MidPairPricing()
-            </b-button> -->
-            <b-button @click="SwapTokens()">
-              Swap Now!
+            <b-button pill block class="my-0 px-5 py-2 trade-btn" variant="info" @click="SwapTokens()">
+              <i class="fa-solid fa-repeat" /> Swap Now!
             </b-button>
           </b-button-group>
         </div>
@@ -182,9 +215,9 @@ export default {
       )
       // alert(pair)
       const route = new Route([pair], this.tokenA)
-      alert('Route: ' + route)
-      alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
-      alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
+      // alert('Route: ' + route)
+      // alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
+      // alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
       this.TakerMidPrice = route.midPrice.toSignificant(10)
     },
     async SwapTokens () {
@@ -205,34 +238,34 @@ export default {
       )
 
       const route = new Route([pair], this.tokenA)
-      alert('Route: ' + route)
+      // alert('Route: ' + route)
 
       const amountIn = ethers.utils.parseUnits(String(this.sellAmount), tokenA.decimal) // tokenA or MakerToken sellAmount (How much we want to trade for)
-      alert('Amount In (WEI): ' + amountIn)
+      // alert('Amount In (WEI): ' + amountIn)
       const trade = new Trade(route, new TokenAmount(tokenA, amountIn), TradeType.EXACT_INPUT)
-      alert('Trade Object: ' + trade)
+      // alert('Trade Object: ' + trade)
 
       const slippageTolerance = new Percent(String(this.SlippageSelected), '10000') // 50 bips, or 0.50%
-      alert('Slippage Tollerance: ' + slippageTolerance + '%')
+      // alert('Slippage Tollerance: ' + slippageTolerance + '%')
       const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw // needs to be converted to e.g. hex
-      alert('Amount Out Minimum: ' + amountOutMin)
+      // alert('Amount Out Minimum: ' + amountOutMin)
       const path = [tokenA.address, tokenB.address]
-      alert('Path: ' + path)
+      // alert('Path: ' + path)
       const to = this.account // should be a checksummed recipient address
-      alert(`Swapped tokens will be received at our account ${to} .`)
+      // alert(`Swapped tokens will be received at our account ${to} .`)
       const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 minutes from the current Unix time
-      alert('Transaction Deadline: ' + deadline)
+      // alert('Transaction Deadline: ' + deadline)
       const valueAmount = trade.inputAmount.raw // // needs to be converted to e.g. hex
-      alert(`Input amount ( ${valueAmount} ) we would like to trade in return for the tokens we wish to receive: `)
+      // alert(`Input amount ( ${valueAmount} ) we would like to trade in return for the tokens we wish to receive: `)
 
       const router = new ethers.Contract(this.MainnetRouter, ROUTER.abi, this.signer)
       const wethAddress = await router.WETH()
-      alert(wethAddress)
+      // alert(wethAddress)
       const TokenAContractInstance = new ethers.Contract(this.MakerToken.TokenContract, ERC20.abi, this.signer)
-      const tokenDecimals = tokenA.decimals
-      alert('TokenA Decimal: ' + tokenDecimals)
+      // const tokenDecimals = tokenA.decimals
+      // alert('TokenA Decimal: ' + tokenDecimals)
       const maxApproval = new BigNumber(2).pow(256).minus(1)
-      alert('Max Approval: ' + maxApproval)
+      // alert('Max Approval: ' + maxApproval)
 
       const approveTokenAmount = await TokenAContractInstance.approve(this.MainnetRouter, String(maxApproval))
       alert(approveTokenAmount)
@@ -270,17 +303,17 @@ export default {
       this.TXreceipt = receipt
       this.SlopQuoteAmount = null
       this.sellAmount = null
-      alert(this.TXreceipt)
+      // alert(this.TXreceipt)
     },
     async ChangePairMidPrice () {
       this.TakerMidPrice = null
       // const provider = new ethers.providers.Web3Provider(window.ethereum)
       const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
       this.tokenA = tokenA
-      alert(tokenA.name)
+      // alert(tokenA.name)
       const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
       this.tokenB = tokenB
-      alert(tokenB.name)
+      // alert(tokenB.name)
 
       const pairAddress = Pair.getAddress(tokenA, tokenB)
       // alert('Pair Address: ' + pairAddress)
@@ -297,9 +330,9 @@ export default {
       this.CreatedPair = pair
       const route = new Route([pair], tokenA)
       // alert(route)
-      alert('Route: ' + route)
-      alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
-      alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
+      // alert('Route: ' + route)
+      // alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
+      // alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
       this.TakerMidPrice = route.midPrice.toSignificant(10)
     },
     async checkBalance () {
@@ -512,6 +545,13 @@ export default {
 }
 </script>
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+.one-to-one-container {
+  font-variant-caps: all-small-caps;
+  font-size: 1.2rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #505960;
+}
 .amounts {
   border-radius: 4rem;
 }
@@ -520,5 +560,162 @@ export default {
 }
 .slippage-selector {
   border-radius: 4rem;
+}
+.slopswap-logo {
+  max-height: 140px;
+}
+.sweet-alert {
+  font-variant-caps: all-small-caps;
+  font-size: 1.2rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #212529;
+}
+.nav-link {
+    display: block;
+    padding: 0.5rem 1rem;
+}
+.btn-primary {
+  border-radius: 8rem;
+}
+.center-trade-char {
+  max-width: 200px;
+}
+.config-btns .btn {
+  background-color: transparent;
+  border-color: transparent;
+  padding: 0px;
+}
+.sheep-bg {
+  background-image: url(~/assets/img/page-graphics/sheep-bg.png) !important;
+  background-size: 50%;
+  background-position: top center;
+  background-repeat: no-repeat;
+  padding-top: 50px;
+}
+.config-btns .btn:focus {
+  background-color: transparent;
+  border-color: transparent;
+}
+.btn:focus, .btn.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 0%);
+}
+.label-title {
+  font-variant-caps: all-small-caps;
+  font-size: 1.1rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #212529;
+}
+.blockchain-radio-btns {
+  font-variant-caps: all-small-caps;
+  font-size: 1.1rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #212529;
+}
+.main-title {
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  font-size: 2.9rem;
+  font-family: 'Fredoka One', sans-serif;
+}
+.blue-gray {
+  color: #17a2b8;
+}
+.red {
+  color: #c1272d;
+}
+.slippage-title {
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #505960;
+  margin: 0rem;
+}
+.gas-title {
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+  font-family: 'Fredoka One', sans-serif;
+  color: #505960;
+  margin: 0rem;
+}
+.maker-token-img {
+  max-height: 32px;
+}
+.hidden-field {
+  visibility: hidden;
+}
+.left-group-btn {
+  border-top-left-radius: 4rem;
+  border-bottom-left-radius: 4rem;
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+}
+.right-group-btn {
+  border-top-right-radius: 4rem;
+  border-bottom-right-radius: 4rem;
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+}
+a .slippage-selector {
+  margin: 0rem;
+}
+.slippage-selector {
+  background-color: transparent;
+  border-color: transparent;
+  margin: 0rem;
+}
+.trade-container {
+  padding: 1rem;
+  margin-bottom: auto;
+  vertical-align: middle;
+}
+.custom-select {
+    display: inline-block;
+    width: 100%;
+    height: calc(1em + 0.75rem + 2px);
+    padding: 0rem 1.75rem 0rem 0rem;
+    margin: 0px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    line-height: 1;
+    color: #495057;
+    vertical-align: top;
+    /* border: 1px solid #ced4da; */
+    border-radius: 0.25rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.trade-btn {
+  padding: 0rem;
+  margin-top: 0rem;
+  font-size: 1.7rem;
+  /* font-family: 'Arimo', sans-serif;*/
+  font-family: 'Fredoka One', sans-serif;
+  font-variant: all-small-caps;
+  background-color: #212529;
+  border-color: #FFFFFF;
+  /*background-image: url(~/assets/img/page-graphics/light-blue-splatter.png);
+  background-position: center right;
+  background-size: 50%;
+  background-repeat: no-repeat;*/
+}
+.maker-token-amount {
+  border-radius: 4rem;
+  margin-top: 0rem;
+}
+.taker-token-amount {
+  border-radius: 4rem;
+  margin-top: 0rem;
+}
+.dollar-value {
+  font-size: 1.8rem;
+}
+.trade-symbol-container {
+  margin-top: 3rem;
+  margin-bottom:2rem;
+}
+.animate__animated.animate__rotatIn {
+  --animate-duration: 2s;
 }
 </style>

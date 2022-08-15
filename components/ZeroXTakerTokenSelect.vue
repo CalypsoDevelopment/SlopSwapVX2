@@ -55,12 +55,9 @@
   </b-container>
 </template>
 <script>
-// const ethers = require('ethers')
-// import 'animate.css'
-// const Console = require('Console')
-// Console.log('Console.log is now available!')
-const slopswaplib = require('slopswapxlibs')
+const ethers = require('ethers')
 const tokenList = require('~/static/tokenLists/BSCTokenList.json')
+const tokenListAVAX = require('~/static/tokenLists/AVAXTokenList.json')
 export default {
   name: 'SlopSwapTakerTokenSelect',
   components: {},
@@ -77,32 +74,69 @@ export default {
       TakerToken: { ChainID: 56, TokenName: 'PancakeSwap Token (Cake)', TokenSymbol: 'Cake', TokenContract: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', TokenDecimal: 18, TokenType: 'ERC20', BrandPrimary: '#d1884f' },
       MetamaskConnection: Object,
       TakerAmount: null,
-      TakerDollarAmount: null
+      TakerDollarAmount: null,
+      currentChainID: 56
+    }
+  },
+  watch: {
+    changeToken (value) {
+      this.TakerToken = value
+      switch (this.chain) {
+        case 56:
+          // code block
+          this.showAlert('Blockchain ID: 56', 'Please make sure to change your wallet network before you trade')
+          this.currentChainID = 56
+          this.tokens = tokenList
+          break
+        case 43114:
+          // code block
+          this.showAlert('Blockchain ID: 43114', 'Please make sure to change your wallet network before you trade')
+          this.currentChainID = 43114
+          this.tokens = tokenListAVAX
+          break
+        default:
+          // code block
+          // this.currentChainID = 56
+          // this.tokens = tokenList
+      }
+    },
+    chain (value) {
+      this.currentChainID = value
+      if (this.chain === 56) {
+        this.tokens = tokenList
+      } else {
+        this.tokens = tokenListAVAX
+      }
     }
   },
   beforeMount () {
     this.connectMeta()
   },
   methods: {
+    showAlert (title, html) {
+      // Use sweetalert2
+      this.$swal({
+        title,
+        html
+      })
+    },
+    ChangePassedToken () {
+      if (this.changeToken !== null) {
+        alert(this.TakerTokenPass)
+      }
+    },
     async connectMeta () {
-      const provider = slopswaplib.getProvider()
-      // MetaMask requires requesting permission to connect users accounts
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      await provider.send('eth_requestAccounts', [])
+      const signer = provider.getSigner()
+
       const accounts = await provider.send('eth_requestAccounts', [])
       const account = accounts[0]
-      // The MetaMask plugin also allows signing transactions to
-      // send ether and pay to change state within the blockchain.
-      // For this, you need the account signer...
-      const signer = slopswaplib.getSigner(provider)
 
       this.MetamaskConnection = {
         provider,
         signer,
         account
-      }
-    },
-    ChangePassedToken () {
-      if (this.changeToken !== null) {
-        alert(this.TakerTokenPass)
       }
     },
     changeTakerToken (ChainID, TokenName, TokenSymbol, TokenContract, TokenDecimal, TokenType, BrandPrimary) {
@@ -111,10 +145,7 @@ export default {
       this.buyAmount = null
       this.$bvModal.hide('makerselect')
       this.$bvModal.hide('takerselect')
-      // this.$bvModal.hide('TokenA')
-      // this.$bvModal.hide('TokenB')
       this.quoteResponse = {}
-      // const TakerTokenContract = this.TakerToken.TokenContract
       this.$emit('changeTakerTokenBalance', this.TakerToken)
       this.$emit('changeTakerToken', this.TakerToken)
     }
@@ -122,6 +153,7 @@ export default {
 } // END OF EXPORT DEFAULT
 </script>
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 .taker-token-container {
   margin-top: 2rem;
   margin-bottom:2rem;

@@ -16,7 +16,7 @@
           <b-nav-item to="/slopswaptrade">
             Trade
           </b-nav-item>
-          <b-nav-item to="/liquidityprovider">
+          <b-nav-item to="/slopswapliquidity">
             Liquidity
           </b-nav-item>
           <b-nav-item to="/zeroxprotocol">
@@ -98,7 +98,7 @@ import detectEthereumProvider from '@metamask/detect-provider'
 const ethers = require('ethers')
 
 export default {
-  name: 'TopNavbarComplex',
+  name: 'SlopSwapTopNavBar',
   components: {},
   data () {
     return {

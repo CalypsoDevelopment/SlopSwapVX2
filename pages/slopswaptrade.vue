@@ -1,15 +1,31 @@
 <template>
-  <b-container fluid class="bg">
+  <b-container fluid class="bg px-0">
     <SlopSwapTopNavBar />
-    <SlopSwapTradeInterface />
+    <div class="farm-bg">
+      <b-img src="~/assets/img/page-graphics/220-Sized-Header-Rise-Of-the-PigsV2.png" fluid alt="Responsive image" />
+    </div>
+    <b-container fluid>
+      <b-row>
+        <b-col sm="12" medium="12" lg="2" class="text-center" />
+        <b-col sm="12" medium="12" lg="8" class="text-center">
+          <div class="app-container">
+            <SlopSwapTrader />
+            <SlopSwapTradeInterface />
+          </div>
+        </b-col>
+        <b-col sm="12" medium="12" lg="2" class="text-center" />
+      </b-row>
+    </b-container>
   </b-container>
 </template>
 
 <script>
-
+import SlopSwapTopNavBar from '~/components/SlopSwapTopNavBar.vue'
+import SlopSwapTrader from '~/components/SlopSwapTrader.vue'
+import SlopSwapTradeInterface from '~/components/SlopSwapTradeInterface.vue'
 export default {
   name: 'SlopSwapTrade',
-  components: { }
+  components: { SlopSwapTopNavBar, SlopSwapTrader, SlopSwapTradeInterface }
 }
 </script>
 <style scoped>

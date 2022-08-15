@@ -1,0 +1,43 @@
+[
+  { "ChainID": 43114, "TokenName": "Wrapped AVAX", "TokenSymbol": "WAVAX", "TokenContract": "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Wrapped BNB (Wormhole)", "TokenSymbol": "WBNB", "TokenContract": "0x442F7f22b1EE2c842bEAFf52880d4573E9201158", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Tether USD", "TokenSymbol": "USDT.e", "TokenContract": "0xc7198437980c041c805A1EDcbA50c1Ce5db95118", "TokenDecimal": 6, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "PancakeSwap Token (Cake Wormhole)", "TokenSymbol": "Cake", "TokenContract": "0x98a4d09036Cc5337810096b1D004109686E56Afc", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  {"ChainID": 43114, "TokenName": "SHIBA INU Token", "TokenSymbol": "SHIB.e", "TokenContract": "0x02D980A0D7AF3fb7Cf7Df8cB35d9eDBCF355f665", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "USD Coin", "TokenSymbol": "USDC", "TokenContract": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E", "TokenDecimal": 6, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Binance USD", "TokenSymbol": "BUSD.e", "TokenContract": "0x19860CCB0A68fd4213aB9D8266F7bBf05A8dDe98", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Dai Stablecoin", "TokenSymbol": "DAI.e", "TokenContract": "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70", "TokenDecimal": 18, "TokenType": "ERC20" },
+  
+  { "ChainID": 43114, "TokenName": "Uniswap", "TokenSymbol": "UNI.e", "TokenContract": "0x8eBAf22B6F053dFFeaf46f4Dd9eFA95D89ba8580", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Wrapped BTC", "TokenSymbol": "WBTC.e", "TokenContract": "0x50b7545627a5162F82A992c33b87aDc75187B218", "TokenDecimal": 8, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Chainlink Token", "TokenSymbol": "LINK.e", "TokenContract": "0x5947BB275c521040051D82396192181b413227A3", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Frax", "TokenSymbol": "FRAX", "TokenContract": "0xD24C2Ad096400B6FBcd2ad8B24E7acBc21A1da64", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "True USD", "TokenSymbol": "TUSD", "TokenContract": "0x1C20E891Bab6b1727d14Da358FAe2984Ed9B59EB", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Aave Token", "TokenSymbol": "AAVE.e", "TokenContract": "0x63a72806098Bd3D9520cC43356dD78afe5D386D9", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Maker", "TokenSymbol": "MKR.e", "TokenContract": "0x88128fd4b259552A9A1D457f435a6527AAb72d42", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Decentralized USD", "TokenSymbol": "USDD", "TokenContract": "0xcf799767d366d789e8B446981C2D578E241fa25c", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Graph Token", "TokenSymbol": "GRT.e", "TokenContract": "0x8a0cAc13c7da965a312f08ea4229c37869e85cB9", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Basic Attention Token", "TokenSymbol": "BAT.e", "TokenContract": "0x98443B96EA4b0858FDF3219Cd13e98C7A4690588", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Curve DAO Token", "TokenSymbol": "CRV.e", "TokenContract": "0x249848BeCA43aC405b8102Ec90Dd5F22CA513c06", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "Synthetix Network Token", "TokenSymbol": "SNX.e", "TokenContract": "0xBeC243C995409E6520D7C41E404da5dEba4b209B", "TokenDecimal": 18, "TokenType": "ERC20" },
+
+  { "ChainID": 43114, "TokenName": "1INCH Token", "TokenSymbol": "1INCH.e", "TokenContract": "0xd501281565bf7789224523144Fe5D98e8B28f267", "TokenDecimal": 18, "TokenType": "ERC20" }
+]

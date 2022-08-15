@@ -37,94 +37,10 @@
             </b-input-group-append>
           </b-input-group>
         </b-col>
-        <b-col sm="6" medium="6" lg="3">
-          <div class="mx-2">
-            <b-card
-              title="Life on the Farm News"
-              img-src="~/assets/img/page-graphics/Life-On-the-Farm-Blog.jpg"
-              img-alt="Image"
-              img-top
-              tag="article"
-              class="info-panel my-4 mx-2 px-1 py-1"
-            >
-              <b-card-text>
-                Life on the Farm News is where SlopSwap keeps our users informed of the latest news within blockchain technology.
-              </b-card-text>
-
-              <b-button pill href="#" variant="primary">
-                Learn About Blockchain
-              </b-button>
-            </b-card>
-          </div>
-        </b-col>
-
-        <b-col sm="6" medium="6" lg="3">
-          <div class="mx-2">
-            <b-card
-              title="Token Generation"
-              img-src="~/assets/img/page-graphics/Crypto-Asset-Generation.jpg"
-              img-alt="Image"
-              img-top
-              tag="article"
-              class="info-panel my-4 mx-2 px-1 py-1"
-            >
-              <b-card-text>
-                Generate &amp; create your project token from a range of custom features. We also have token themes from popular projects.
-              </b-card-text>
-
-              <b-button pill href="#" variant="primary">
-                Create Tokens
-              </b-button>
-            </b-card>
-          </div>
-        </b-col>
-
-        <b-col sm="6" medium="6" lg="3">
-          <div class="mx-1">
-            <b-card
-              title="Cryptocurrency Onboarding"
-              img-src="~/assets/img/page-graphics/Crypto-Educational-Onboarding.jpg"
-              img-alt="Image"
-              img-top
-              tag="article"
-              class="info-panel my-4 mx-2 px-1 py-1"
-            >
-              <b-card-text>
-                We understand that learning something new can be intimidating, but learning Web 3.0 technology is much easier than you think!
-              </b-card-text>
-
-              <b-button pill href="#" variant="primary">
-                Crypto Onboarding
-              </b-button>
-            </b-card>
-          </div>
-        </b-col>
-
-        <b-col sm="6" medium="6" lg="3">
-          <div class="mx-1">
-            <b-card
-              title="Cross-chain Bridge"
-              img-src="~/assets/img/page-graphics/SlopSwap-Bridge.jpg"
-              img-alt="Image"
-              img-top
-              tag="article"
-              class="info-panel my-4 mx-2 px-1 py-1"
-            >
-              <b-card-text>
-                We're currently working on our cross-chain bridge. Soon you'll be able to trade between the popular blockchains.
-              </b-card-text>
-
-              <b-button pill href="#" variant="primary">
-                The Crypto Bridge
-              </b-button>
-            </b-card>
-          </div>
-        </b-col>
-
         <b-col sm="12" medium="12" lg="2" class="text-center" />
         <b-col sm="12" medium="12" lg="8" class="text-center">
           <div class="app-container">
-            <SlopSwapTrader />
+            <zeroXSwap />
           </div>
         </b-col>
         <b-col sm="12" medium="12" lg="2" class="text-center" />
@@ -135,11 +51,11 @@
 
 <script>
 import SlopSwapTopNavBar from '~/components/SlopSwapTopNavBar.vue'
-import SlopSwapTrader from '~/components/SlopSwapTrader.vue'
+import zeroXSwap from '~/components/zeroXSwap.vue'
 
 export default {
-  name: 'IndexPage',
-  components: { SlopSwapTrader, SlopSwapTopNavBar },
+  name: 'ZeroXProtocol',
+  components: { zeroXSwap, SlopSwapTopNavBar },
   data () {
     return {
       search: null
