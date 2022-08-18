@@ -4,6 +4,7 @@
       <b-col class="px-0">
         <div class="ttoken-select-container">
           <b-button
+            id="taker-button"
             class="liquidity-taker-token-select-btn"
             block
             :change-token="TakerTokenPass"
@@ -114,7 +115,7 @@ export default {
   } // END OF METHODS
 } // END OF EXPORT DEFAULT
 </script>
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 .taker-token-container {
   margin-top: 2rem;
@@ -125,7 +126,7 @@ export default {
   /* background-color: #FFFFFF; */
   border-radius: 4rem;
 }
-.liquidity-taker-token-select-btn[data-v-87d4939c] {
+.ttoken-select-container .taker-token-select-btn[data-v-87d4939c] {
     font-family: 'Fredoka One', sans-serif !important;
     color: #FFFFFF;
     font-feature-settings: "smcp", "c2sc";
@@ -133,12 +134,14 @@ export default {
     font-weight: 500;
     font-size: 2rem;
     padding: 0.45rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
     border-radius: 4rem;
     border-color: #FFFFFF;
-    background-color: #5d3d42;
+    background-color: #5d3d42 !important;
 }
 
-.liquidity-taker-token-select-btn {
+#taker-button {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;

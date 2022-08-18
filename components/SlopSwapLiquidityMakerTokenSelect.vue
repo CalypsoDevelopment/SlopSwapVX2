@@ -4,10 +4,12 @@
       <b-col class="px-0">
         <div class="mtoken-select-container mx-0">
           <b-button
+            id="maker-btn"
             class="maker-token-select-btn"
             block
             :change-token="MakerTokenPass"
             :chain-id="chain"
+            variant="none"
             @click="$bvModal.show('makerselect')"
           >
             <b-img
@@ -136,7 +138,7 @@ export default {
   } // END OF METHODS
 } // END OF EXPORT DEFAULT
 </script>
-<style scoped>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
 .maker-token-container {
   margin-top: 2rem;
@@ -147,7 +149,36 @@ export default {
   /* background-color: #FFFFFF; */
   border-radius: 4rem;
 }
-.maker-token-select-btn {
+.maker-token-select-btn[data-v-66a8d999] {
+    font-family: 'Fredoka One', sans-serif !important;
+    color: #FFFFFF;
+    font-feature-settings: "smcp", "c2sc";
+    font-variant: all-small-caps;
+    font-weight: 500;
+    font-size: 2rem;
+    padding: 0.45rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    border-radius: 4rem;
+    border-color: #FFFFFF;
+    background-color: #5d3d42 !important;
+}
+.mtoken-select-container .maker-token-select-btn[data-v-66a8d999] {
+    font-family: 'Fredoka One', sans-serif !important;
+    color: #FFFFFF;
+    font-feature-settings: "smcp", "c2sc";
+    font-variant: all-small-caps;
+    font-weight: 500;
+    font-size: 2rem;
+    padding: 0.45rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    border-radius: 4rem;
+    border-color: #FFFFFF;
+    background-color: #5d3d42 !important;
+}
+
+#maker-btn {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;
@@ -158,7 +189,7 @@ export default {
   margin-left: 0rem;
   border-radius: 4rem;
   border-color: #FFFFFF;
-  background-color: #5d3d42;
+  background-color: #5d3d42 !important;
   /*background-image: url(~/assets/img/page-graphics/dark-gray-splatter.png);
   background-position: top left;
   background-size: 70%;*/

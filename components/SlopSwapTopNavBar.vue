@@ -22,6 +22,9 @@
           <b-nav-item to="/zeroxprotocol">
             0x Trade
           </b-nav-item>
+          <b-nav-item to="/liquiditytoken">
+            Liquidity Token Gen
+          </b-nav-item>
           <b-nav-item to="/">
             News
           </b-nav-item>
@@ -96,6 +99,7 @@
 // const MetaMaskOnboarding = require('@metamask/onboarding')
 import detectEthereumProvider from '@metamask/detect-provider'
 const ethers = require('ethers')
+const Swal = require('sweetalert2')
 
 export default {
   name: 'SlopSwapTopNavBar',
@@ -115,12 +119,29 @@ export default {
   watch: {
     provider () {
       this.ForcePageRefresh()
+      this.DetectMetamaskChanges()
     }
   },
   beforeMount () {
     this.OnLoadCheckWalletStatus()
   },
   methods: {
+    async DetectMetamaskChanges () {
+      /**********************************************************/
+      /* Handle chain (network) and chainChanged (per EIP-1193) */
+      /**********************************************************/
+
+      const chainId = await this.provider.request({ method: 'eth_chainId' })
+      handleChainChanged(chainId)
+      this.provider.on('chainChanged', handleChainChanged)
+      this.ChainChanged('The blockchain has changed.')
+
+      function handleChainChanged (_chainId) {
+        // We recommend reloading the page, unless you must do otherwise
+        window.location.reload()
+        this.ChainChanged('The blockchain has changed.')
+      }
+    },
     // Force page refreshes on network changes
     ForcePageRefresh () {
       // The "any" network will allow spontaneous network changes
@@ -133,6 +154,11 @@ export default {
           window.location.reload()
         }
       })
+    },
+    ChainChanged (alertMessage) {
+      Swal.fire(
+        alertMessage
+      )
     },
     async OnLoadCheckWalletStatus () {
       const provider = await detectEthereumProvider()

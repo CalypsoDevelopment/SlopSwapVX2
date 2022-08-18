@@ -208,10 +208,17 @@ export default {
         takerAddress: this.account
       }
       // Fetch the swap quote.
-      const response = await fetch(`https://api.0x.org/swap/v1/quote?${qs.stringify(params)}`)
-      const swapQuoteJSON = await response.json()
-      this.PreSaleLiquiditySource = swapQuoteJSON
-
+      const myrequest = new Request(
+        `https://bsc.api.0x.org/swap/v1/price?${qs.stringify(params)}`
+      )
+      fetch(myrequest)
+        .then(response => response.json())
+        .then((data) => {
+          // alert('Allowance Target: ' + data.allowanceTarget)
+          this.quote = data
+        })
+      // this.quote = response
+      alert('Data Package: ' + this.quote)
       const fromTokenAddress = this.MakerToken.TokenContract
 
       const maxApproval = new BigNumber(2).pow(256).minus(1)
@@ -224,9 +231,9 @@ export default {
       await tx.send({
         to: String(this.Allowance),
         from: String(this.account),
-        data: swapQuoteJSON.data,
+        data: this.quote,
         gas: String(this.EstimatedGasPrice),
-        gasLimit: '550000'
+        gasLimit: '250000'
       })
         .then((tx) => {
           alert('tx: ' + tx)
@@ -235,9 +242,9 @@ export default {
         from: String(this.account),
         to: String(this.Allowance),
         value: SELL_AMOUNT,
-        data: swapQuoteJSON.data,
+        data: this.quote.data,
         gas: String(this.EstimatedGasPrice),
-        gasLimit: '550000'
+        gasLimit: '250000'
       },
       this.signer
       )

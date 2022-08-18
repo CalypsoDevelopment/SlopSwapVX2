@@ -1,5 +1,10 @@
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
+  generate: {
+    target: 'static',
+    ssr: true,
+    fallback: true
+  },
   head: {
     title: 'slopswap_pinia_nuxt2',
     htmlAttrs: {

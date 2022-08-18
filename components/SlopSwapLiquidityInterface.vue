@@ -1,17 +1,52 @@
 <template>
   <b-container class="liquidity-container">
+    <SlopSwapTXReceiptSidebar :receipt-data="TransactionReceipt" />
     <b-row>
       <b-col sm="12" md="12" lg="12">
         <h1 class="text-center main-title">
           <span class="purple">Slop</span>Swap <span class="purple">Liquidity</span>
         </h1>
       </b-col>
+      <b-col sm="12" medium="12" lg="12">
+        <div>
+          <b-nav class="config-btns">
+            <b-nav-item active>
+              <b-button v-b-toggle.TXSettingsConfig pill class="liquidity-nav-btn" variant="none">
+                <i class="fa-solid fa-gears" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTradeConfiguration />
+            </b-nav-item>
+            <b-nav-item active>
+              <b-button v-b-toggle.PairSpecifications pill class="liquidity-nav-btn" variant="none">
+                <i class="fa-solid fa-table" style="color: #3E3D40;" />
+              </b-button>
+              <PairSpecificationSidebar />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button id="TXsidebar1" v-b-toggle.TXsidebar1 pill class="liquidity-nav-btn" variant="none">
+                <i class="fa-solid fa-clock-rotate-left" />
+              </b-button>
+              <SlopSwapTXHistory />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-toggle.TradingPairGraph pill class="liquidity-nav-btn" variant="none">
+                <i class="fa-solid fa-chart-area" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapPairGraphSidebar />
+            </b-nav-item>
+            <b-nav-item>
+              <b-form-select v-model="SlippageSelected" class="slippage-selector slippage-title" :options="SlippageOptions" />
+            </b-nav-item>
+          </b-nav>
+        </div>
+      </b-col>
       <b-col sm="12" md="12" lg="5">
         <SlopSwapLiquidityMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
         <b-form-input v-model="TokenAPairAmount" class="amounts" :value="TokenAPairAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
       </b-col>
       <b-col sm="12" md="12" lg="2">
-        <div class="vert-middle-align">
+        <div>
+          <b-img src="~/assets/img/page-graphics/liquidity-graphic.svg" class="center-trade-char" fluid alt="Responsive image" />
           <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
         </div>
       </b-col>
@@ -35,6 +70,10 @@
               Provide Liquidity!
             </b-button>
           </b-button-group>
+          <br>
+          <b-button pill class="remove-liquidity-btn mt-3" @click="removeLiquidity()">
+            Remove Liquidity
+          </b-button>
         </div>
       </b-col>
       <b-col sm="12" md="12" lg="4">
@@ -189,11 +228,6 @@
           -->
         </b-list-group>
       </b-col>
-      <b-col>
-        <div v-if="TXreceipt">
-          {{ TXreceipt }}
-        </div>
-      </b-col>
       <!--<b-col sm="12" md="12" lg="12">
       </b-col>
       <b-col sm="12" md="12" lg="12">
@@ -206,6 +240,7 @@ import { ChainId, Fetcher, Route, Token, Pair, TokenAmount } from '@uniswap/sdk'
 import detectEthereumProvider from '@metamask/detect-provider'
 import SlopSwapLiquidityMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
 import SlopSwapLiquidityTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
+import SlopSwapTXReceiptSidebar from '~/components/SlopSwapTXReceiptSidebar.vue'
 const axios = require('axios')
 const ethers = require('ethers')
 const qs = require('qs')
@@ -218,7 +253,7 @@ const FACTORY = require('~/static/artifacts/SlopSwapFactory.json')
 export default {
   name: 'SlopSwapLiquidityInterface',
   components: {
-    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect
+    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect, SlopSwapTXReceiptSidebar
   },
   data () {
     return {
@@ -233,34 +268,34 @@ export default {
       chainID: ChainId.MAINNET,
       SlippageSelected: 0.04,
       SlippageOptions: [
-        { value: 0.00, text: 'Slippage' },
-        { value: 0.01, text: '1% Slippage' },
-        { value: 0.02, text: '2% Slippage' },
-        { value: 0.03, text: '3% Slippage' },
-        { value: 0.04, text: '4% Slippage' },
-        { value: 0.05, text: '5% Slippage' },
-        { value: 0.06, text: '6% Slippage' },
-        { value: 0.07, text: '7% Slippage' },
-        { value: 0.08, text: '8% Slippage' },
-        { value: 0.09, text: '9% Slippage' },
-        { value: 0.10, text: '10% Slippage' },
-        { value: 0.11, text: '11% Slippage' },
-        { value: 0.12, text: '12% Slippage' },
-        { value: 0.13, text: '13% Slippage' },
-        { value: 0.14, text: '14% Slippage' },
-        { value: 0.15, text: '15% Slippage' },
-        { value: 0.16, text: '16% Slippage' },
-        { value: 0.17, text: '17% Slippage' },
-        { value: 0.18, text: '18% Slippage' },
-        { value: 0.19, text: '19% Slippage' },
-        { value: 0.20, text: '20% Slippage' },
-        { value: 0.21, text: '21% Slippage' },
-        { value: 0.22, text: '22% Slippage' },
-        { value: 0.23, text: '23% Slippage' },
-        { value: 0.24, text: '24% Slippage' },
-        { value: 0.25, text: '25% Slippage' }
+        { value: 0.00, text: 'Slip' },
+        { value: 0.01, text: '1% Slip' },
+        { value: 0.02, text: '2% Slip' },
+        { value: 0.03, text: '3% Slip' },
+        { value: 0.04, text: '4% Slip' },
+        { value: 0.05, text: '5% Slip' },
+        { value: 0.06, text: '6% Slip' },
+        { value: 0.07, text: '7% Slip' },
+        { value: 0.08, text: '8% Slip' },
+        { value: 0.09, text: '9% Slip' },
+        { value: 0.10, text: '10% Slip' },
+        { value: 0.11, text: '11% Slip' },
+        { value: 0.12, text: '12% Slip' },
+        { value: 0.13, text: '13% Slip' },
+        { value: 0.14, text: '14% Slip' },
+        { value: 0.15, text: '15% Slip' },
+        { value: 0.16, text: '16% Slip' },
+        { value: 0.17, text: '17% Slip' },
+        { value: 0.18, text: '18% Slip' },
+        { value: 0.19, text: '19% Slip' },
+        { value: 0.20, text: '20% Slip' },
+        { value: 0.21, text: '21% Slip' },
+        { value: 0.22, text: '22% Slip' },
+        { value: 0.23, text: '23% Slip' },
+        { value: 0.24, text: '24% Slip' },
+        { value: 0.25, text: '25% Slip' }
       ],
-      TXreceipt: null,
+      TransactionReceipt: null,
       MakerMidPrice: null,
       TakerMidPrice: null,
       tokenA: null,
@@ -416,7 +451,8 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TXReceipt = receipt
+        this.TransactionReceipt = receipt
+        this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       } else if (this.TakerToken.TokenContract === this.WETH) {
         // Token + Eth
         const tx = await this.router.addLiquidityETH(
@@ -433,7 +469,8 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TXReceipt = receipt
+        this.TransactionReceipt = receipt
+        this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       } else {
         // Token + Token
         const tx = await this.router.addLiquidity(
@@ -451,7 +488,8 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TXReceipt = receipt
+        this.TransactionReceipt = receipt
+        this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       }
     },
     // Function used to remove Liquidity from any pair of tokens or token-AUT
@@ -465,7 +503,69 @@ export default {
     //    `accountAddress` - An Ethereum address of the current user's account
     //    `provider` - The current provider
     //    `signer` - The current signer
-    async removeLiquidity (
+    async removeLiquidity () {
+      const address1 = this.tokenA.address
+      const address2 = this.tokenB.address
+
+      const pairAddress = await this.factory.getPair(address1, address2)
+      const pair = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
+      this.pair = pair
+      const LiquidityTokenBlance = await this.pair.balanceOf(this.account)
+      alert('Liquidity Balance' + LiquidityTokenBlance)
+      const liquidity = ethers.utils.formatEther(String(LiquidityTokenBlance))
+      alert('User Liquidity Token Balance: ' + liquidity)
+      /* const amount1Min = ethers.utils.parseEther(amount1min.toString())
+      const amount2Min = ethers.utils.parseEther(amount2min.toString())
+
+      const time = Math.floor(Date.now() / 1000) + 200000
+      const deadline = ethers.BigNumber.from(time)
+
+      await pair.approve(routerContract.address, liquidity)
+
+      alert([
+        address1,
+        address2,
+        Number(liquidity),
+        Number(amount1Min),
+        Number(amount2Min),
+        this.account,
+        deadline
+      ])
+
+      if (address1 === this.WETH) {
+        // Eth + Token
+        await routerContract.removeLiquidityETH(
+          address2,
+          liquidity,
+          amount2Min,
+          amount1Min,
+          this.account,
+          deadline
+        )
+      } else if (address2 === this.WETH) {
+        // Token + Eth
+        await routerContract.removeLiquidityETH(
+          address1,
+          liquidity,
+          amount1Min,
+          amount2Min,
+          this.account,
+          deadline
+        )
+      } else {
+        // Token + Token
+        await routerContract.removeLiquidity(
+          address1,
+          address2,
+          liquidity,
+          amount1Min,
+          amount2Min,
+          this.account,
+          deadline
+        )
+      } */
+    },
+    /* async removeLiquidity (
       address1,
       address2,
       LiquidityTokens,
@@ -531,7 +631,7 @@ export default {
           deadline
         )
       }
-    },
+    }, */
     // This function returns the conversion rate between two token addresses
     //    `address1` - An Ethereum address of the token to swaped from (either a token or AUT)
     //    `address2` - An Ethereum address of the token to swaped to (either a token or AUT)
@@ -976,6 +1076,34 @@ export default {
   position: relative;
   right: -10px;
 }
+.maker-token-select-btn[data-v-66a8d999] {
+    font-family: 'Fredoka One', sans-serif !important;
+    color: #FFFFFF;
+    font-feature-settings: "smcp", "c2sc";
+    font-variant: all-small-caps;
+    font-weight: 500;
+    font-size: 2rem;
+    padding: 0.45rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    border-radius: 4rem;
+    border-color: #FFFFFF;
+    background-color: #5d3d42 !important;
+}
+.mtoken-select-container .maker-token-select-btn[data-v-66a8d999] {
+    font-family: 'Fredoka One', sans-serif !important;
+    color: #FFFFFF;
+    font-feature-settings: "smcp", "c2sc";
+    font-variant: all-small-caps;
+    font-weight: 500;
+    font-size: 2rem;
+    padding: 0.45rem;
+    margin-right: 0rem;
+    margin-left: 0rem;
+    border-radius: 4rem;
+    border-color: #FFFFFF;
+    background-color: #5d3d42 !important;
+}
 .main-title {
   font-variant-caps: all-small-caps;
   font-weight: 600;
@@ -996,9 +1124,6 @@ export default {
 }
 .blue-gray {
   color: #17a2b8;
-}
-.red {
-  color: #c1272d;
 }
 .custom-select {
     display: inline-block;
@@ -1026,6 +1151,7 @@ export default {
   font-size: 1rem;
   font-family: 'Fredoka One', cursive;
   height: 26px;
+  min-width: 75px;
 }
 .liquidity-container {
   font-variant-caps: all-small-caps;
@@ -1043,18 +1169,18 @@ export default {
   font-family: 'Fredoka One', sans-serif;
   font-size: 1.4rem;
   font-weight: 400;
-  color: #c1272d;
+  color: #5d3d42 !important;
 }
 .secondary-title {
   font-variant-caps: all-small-caps;
   font-family: 'Fredoka One', sans-serif;
   font-size: 1.4rem;
   font-weight: 400;
-  color: #c1272d;
+  color: #5d3d42 !important;
   text-decoration: none;
 }
 .icons {
-  color: #c1272d;
+  color: #5d3d42;
 }
 .amounts {
   border-radius: 4rem;
@@ -1075,6 +1201,11 @@ export default {
 .right-group-btn {
   border-top-right-radius: 4rem;
   border-bottom-right-radius: 4rem;
+  font-variant-caps: all-small-caps;
+  font-size: 0.85rem;
+  background-color: #5d3d42
+}
+.remove-liquidity-btn {
   font-variant-caps: all-small-caps;
   font-size: 0.85rem;
   background-color: #5d3d42
