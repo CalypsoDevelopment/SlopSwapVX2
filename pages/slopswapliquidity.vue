@@ -2,7 +2,9 @@
   <b-container fluid class="bg px-0">
     <SlopSwapTopNavBar />
     <b-img src="~/assets/img/page-graphics/Wise-Old-OwlV2.png" fluid alt="Responsive image" />
-    <SlopSwapLiquidityInterface />
+    <div class="py-5">
+      <SlopSwapLiquidityInterface />
+    </div>
   </b-container>
 </template>
 <script>

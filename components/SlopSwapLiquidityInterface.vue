@@ -1,6 +1,8 @@
 <template>
   <b-container class="liquidity-container">
-    <SlopSwapTXReceiptSidebar :receipt-data="TransactionReceipt" />
+    <div v-if="TransactionReceipt">
+      <SlopSwapTXReceiptSidebar :receipt-data="TransactionReceipt" />
+    </div>
     <b-row>
       <b-col sm="12" md="12" lg="12">
         <h1 class="text-center main-title">
@@ -43,6 +45,9 @@
       <b-col sm="12" md="12" lg="5">
         <SlopSwapLiquidityMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
         <b-form-input v-model="TokenAPairAmount" class="amounts" :value="TokenAPairAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
+        <div class="text-center mt-1 mb-1">
+          <span class="label-title"><strong>Wallet Balance:</strong> {{ MakerTokenUserBalance }}</span>
+        </div>
       </b-col>
       <b-col sm="12" md="12" lg="2">
         <div>
@@ -53,27 +58,39 @@
       <b-col sm="12" md="12" lg="5">
         <SlopSwapLiquidityTakerTokenSelect :change-token="TakerToken" :chain="chainID" @changeTakerToken="ChangeBuyToken($event)" @changeTakerTokenBalance="TakerReCheckBalance($event)" />
         <b-form-input v-model="TokenBPairAmount" class="amounts" :value="TokenBPairAmount" placeholder="0.0" />
+        <div class="text-center mt-1 mb-1">
+          <span class="label-title"><strong>Wallet Balance:</strong> {{ TakerTokenUserBalance }}</span>
+        </div>
       </b-col>
       <b-col sm="12" md="12" lg="12">
         <div class="text-center my-5">
-          <b-button-group>
+          <b-button-group class="my-2">
             <!--<b-button @click="GetTokenReserves()">
               Get Reserves
             </b-button>
             <b-button @click="PairData()">
               Get Pair Data
             </b-button>-->
-            <b-button size="lg" class="left-group-btn" @click="quoteAddLiquidity()">
-              Liquidity Quote!
+            <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="quoteAddLiquidity()">
+              Add Liquidity Quote!
             </b-button>
-            <b-button size="lg" class="right-group-btn" @click="addLiquidity()">
-              Provide Liquidity!
+            <b-button size="lg" class="right-group-btn" style="background-color: #5d3d42" @click="addLiquidity()">
+              Add Liquidity!
             </b-button>
           </b-button-group>
           <br>
-          <b-button pill class="remove-liquidity-btn mt-3" @click="removeLiquidity()">
-            Remove Liquidity
-          </b-button>
+          <b-button-group class="">
+            <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="removeLiquidityQuote()">
+              Remove Liquidity Quote!
+            </b-button>
+            <b-button size="lg" class="right-group-btn" @click="removeLiquidity()">
+              Remove Liquidity!
+            </b-button>
+          </b-button-group>
+          <br>
+          <!--<b-button pill class="remove-liquidity-btn mt-3" @click="GetPairPoolShare()">
+            Get User Portion Of Pool
+          </b-button>-->
         </div>
       </b-col>
       <b-col sm="12" md="12" lg="4">
@@ -147,6 +164,16 @@
             />
             <br>
             {{ PairAddress }}
+          </b-list-group-item>
+          <b-list-group-item>
+            <div class="text-center">
+              <h2 class="secondary-title my-1">
+                User LP Portion of the Pool
+              </h2>
+              {{ MakerToken.TokenSymbol }}|{{ TakerToken.TokenSymbol }}
+              <br>
+              {{ UserPortionOfPool }}%
+            </div>
           </b-list-group-item>
           <b-list-group-item v-if="LiquidityAddResult">
             <div>
@@ -314,7 +341,11 @@ export default {
       EstimatedGasPrice: null,
       BuyTokenAmount: null,
       GasPrice: null,
-      newPair: null
+      newPair: null,
+      UserPortionOfPool: null,
+      PoolTotalSupply: null,
+      MakerTokenUserBalance: null,
+      TakerTokenUserBalance: null
     }
   },
   watch: {
@@ -325,10 +356,12 @@ export default {
       this.PairData()
       // this.GetPairMidPrice()
       this.ChangePairMidPrice()
+      this.MakerReCheckBalance(value)
     },
     TakerToken (value) {
       this.PairData()
       this.GetPairMidPrice()
+      this.TakerReCheckBalance(value)
     },
     TokenAPairAmount (value) {
       this.PairData()
@@ -342,8 +375,19 @@ export default {
     this.OnLoadCheckWalletStatus()
     this.PairData()
     this.GetPairMidPrice()
+    this.checkBalance()
   },
   methods: {
+    async GetPairPoolShare () {
+      const PairContractInstance = new ethers.Contract(this.PairAddress, PAIR.abi, this.signer)
+      const retrieveLPTokenBalance = await PairContractInstance.balanceOf(String(this.account))
+      const PoolTotalSupply = await PairContractInstance.totalSupply()
+      this.PoolTotalSupply = ethers.utils.formatEther(PoolTotalSupply)
+      const userPoolFormattedBalance = ethers.utils.formatEther(retrieveLPTokenBalance)
+      const UserPoolShare = userPoolFormattedBalance / this.PoolTotalSupply
+      const ConvertPercentage = UserPoolShare * 100
+      this.UserPortionOfPool = ConvertPercentage
+    },
     async addLiquidity () {
       // Declare Maker Token for Uniswap SDK2
       const TokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
@@ -492,6 +536,42 @@ export default {
         this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       }
     },
+    async removeLiquidityQuote (
+      liquidity,
+      factory,
+      signer
+    ) {
+      const address1 = this.MakerToken.TokenContract
+      const address2 = this.TakerToken.TokenContract
+      const pairAddress = this.PairAddress
+      alert('pair address', pairAddress)
+      const pair = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
+
+      const reservesRaw = await this.fetchReserves(address1, address2, pair) // Returns the reserves already formated as ethers
+      const reserveA = reservesRaw[0]
+      const reserveB = reservesRaw[1]
+
+      const feeOn =
+        (await factory.feeTo()) !== 0x0000000000000000000000000000000000000000
+
+      const _kLast = await pair.kLast()
+      const kLast = Number(ethers.utils.formatEther(_kLast))
+
+      const _totalSupply = await pair.totalSupply()
+      let totalSupply = Number(ethers.utils.formatEther(_totalSupply))
+
+      if (feeOn && kLast > 0) {
+        const feeLiquidity =
+          (totalSupply * (Math.sqrt(reserveA * reserveB) - Math.sqrt(kLast))) /
+          (5 * Math.sqrt(reserveA * reserveB) + Math.sqrt(kLast))
+        totalSupply = totalSupply + feeLiquidity
+      }
+
+      const Aout = (reserveA * liquidity) / totalSupply
+      const Bout = (reserveB * liquidity) / totalSupply
+
+      return [liquidity, Aout, Bout]
+    },
     // Function used to remove Liquidity from any pair of tokens or token-AUT
     // To work correctly, there needs to be 9 arguments:
     //    `address1` - An Ethereum address of the coin to recieve (either a token or AUT)
@@ -632,28 +712,6 @@ export default {
         )
       }
     }, */
-    // This function returns the conversion rate between two token addresses
-    //    `address1` - An Ethereum address of the token to swaped from (either a token or AUT)
-    //    `address2` - An Ethereum address of the token to swaped to (either a token or AUT)
-    //    `amountIn` - Amount of the token at address 1 to be swaped from
-    //    `routerContract` - The router contract to carry out this swap
-    async getAmountOut (
-      address1,
-      address2,
-      amountIn,
-      routerContract
-    ) {
-      try {
-        const ValuesOut = await this.router.getAmountsOut(
-          ethers.utils.parseEther(amountIn),
-          [address1, address2]
-        )
-        const AmountOut = ethers.utils.formatEther(ValuesOut[1])
-        return Number(AmountOut)
-      } catch {
-        return false
-      }
-    },
     // This function calls the pair contract to fetch the reserves stored in a the liquidity pool between the token of address1 and the token
     // of address2. Some extra logic was needed to make sure that the results were returned in the correct order, as
     // `pair.getReserves()` would always return the reserves in the same order regardless of which order the addresses were.
@@ -675,6 +733,57 @@ export default {
       } catch (err) {
         alert('no reserves yet')
         return [0, 0]
+      }
+    },
+
+    // This function returns the reserves stored in a the liquidity pool between the token of address1 and the token
+    // of address2, as well as the liquidity tokens owned by accountAddress for that pair.
+    //    `address1` - An Ethereum address of the token to trade from (either a token or AUT)
+    //    `address2` - An Ethereum address of the token to trade to (either a token or AUT)
+    //    `factory` - The current factory
+    //    `signer` - The current signer
+    async getReserves (
+      address1,
+      address2,
+      factory,
+      signer,
+      accountAddress
+    ) {
+      const pairAddress = await factory.getPair(address1, address2)
+      const pair = new ethers.Contract(pairAddress, PAIR.abi, signer)
+
+      const reservesRaw = await this.fetchReserves(address1, address2, pair)
+      const LiquidityTokensBN = await pair.balanceOf(accountAddress)
+      const liquidityTokens = Number(
+        ethers.utils.formatEther(LiquidityTokensBN)
+      ).toFixed(2)
+
+      return [
+        reservesRaw[0].toFixed(2),
+        reservesRaw[1].toFixed(2),
+        liquidityTokens
+      ]
+    },
+    // This function returns the conversion rate between two token addresses
+    //    `address1` - An Ethereum address of the token to swaped from (either a token or AUT)
+    //    `address2` - An Ethereum address of the token to swaped to (either a token or AUT)
+    //    `amountIn` - Amount of the token at address 1 to be swaped from
+    //    `routerContract` - The router contract to carry out this swap
+    async getAmountOut (
+      address1,
+      address2,
+      amountIn,
+      routerContract
+    ) {
+      try {
+        const ValuesOut = await this.router.getAmountsOut(
+          ethers.utils.parseEther(amountIn),
+          [address1, address2]
+        )
+        const AmountOut = ethers.utils.formatEther(ValuesOut[1])
+        return Number(AmountOut)
+      } catch {
+        return false
       }
     },
     // Function used to get a quote of the liquidity addition
@@ -783,6 +892,7 @@ export default {
       this.CreatedPair = pair
       this.Reserve0 = ethers.utils.formatEther(reserve[0])
       this.Reserve1 = ethers.utils.formatEther(reserve[1])
+      this.GetPairPoolShare()
     },
     async GetPairMidPrice () {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -852,30 +962,30 @@ export default {
       this.chainID = provider.network.chainId
       this.BlockchainRadioSelected = provider.network.chainId
 
-      if (this.sellToken.TokenSymbol === 'WBNB') {
+      if (this.MakerToken.TokenSymbol === 'WBNB') {
         // Get Token Balance through Metamask
-        const sellTokenBalance = await provider.getBalance(String(account))
+        const MakerTokenBalance = await provider.getBalance(String(account))
         // alert(TokenABalance)
-        const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
+        const ReturnMakerTokenBalance = ethers.utils.formatEther(String(MakerTokenBalance))
         // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
 
-        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + this.sellToken.TokenSymbol
+        this.MakerTokenUserBalance = ReturnMakerTokenBalance.substring(0, 6) + ' ' + this.MakerToken.TokenSymbol
       } else {
         const BEP20sellToken = new ethers.Contract(
-          this.sellToken.TokenContract, [
+          this.MakerToken.TokenContract, [
             'function name() view returns (string)',
             'function symbol() view returns (string)',
             'function balanceOf(address) view returns (uint)'
           ],
           provider
         )
-        const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
+        const MakerTokenbalance = await BEP20sellToken.balanceOf(String(account))
         // alert(TokenAbalance)
-        const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), this.sellToken.TokenDecimal)
-        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + this.sellToken.TokenSymbol
+        const ReturnMakerTokenbalance = ethers.utils.formatUnits(String(MakerTokenbalance), this.MakerToken.TokenDecimal)
+        this.MakerTokenUserBalance = ReturnMakerTokenbalance.substring(0, 8) + ' ' + this.MakerToken.TokenSymbol
       }
       const BEP20BuyToken = new ethers.Contract(
-        this.buyToken.TokenContract, [
+        this.TakerToken.TokenContract, [
           'function name() view returns (string)',
           'function symbol() view returns (string)',
           'function balanceOf(address) view returns (uint)'
@@ -883,10 +993,10 @@ export default {
         provider
       )
 
-      const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
+      const TakerTokenbalance = await BEP20BuyToken.balanceOf(String(account))
       // alert(buyTokenbalance)
-      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), this.buyToken.TokenDecimal)
-      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + this.buyToken.TokenSymbol
+      const ReturnTakerTokenbalance = ethers.utils.formatUnits(String(TakerTokenbalance), this.TakerToken.TokenDecimal)
+      this.TakerTokenUserBalance = ReturnTakerTokenbalance.substring(0, 8) + ' ' + this.TakerToken.TokenSymbol
     },
     async OnLoadCheckWalletStatus () {
       const provider = await detectEthereumProvider()
@@ -1021,7 +1131,7 @@ export default {
       const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
       // alert(buyTokenbalance)
       const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), sellTok.TokenDecimal)
-      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+      this.MakerTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
     },
     async TakerReCheckBalance (buyTok) {
       // Define Token A & B
@@ -1045,12 +1155,12 @@ export default {
       // alert('Before Token Symbol')
       if (buyTok.TokenSymbol === 'WBNB') {
         // Get Token Balance through Metamask
-        const buyTokenBalance = await provider.getBalance(String(account))
+        const buyTokBalance = await provider.getBalance(String(account))
         // alert(TokenABalance)
-        const ReturnBuyTokenBalance = ethers.utils.formatEther(String(buyTokenBalance))
+        const ReturnBuyTokenBalance = ethers.utils.formatEther(String(buyTokBalance))
         // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
 
-        this.BuyTokenUserBalance = ReturnBuyTokenBalance.substring(0, 6) + ' ' + buyTok.TokenSymbol
+        this.TakerTokenUserBalance = ReturnBuyTokenBalance.substring(0, 6) + ' ' + buyTok.TokenSymbol
       } else {
         const BEP20BuyToken = new ethers.Contract(
           buyTok.TokenContract, [
@@ -1064,7 +1174,7 @@ export default {
         const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
         // alert(buyTokenbalance)
         const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), buyTok.TokenDecimal)
-        this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + buyTok.TokenSymbol
+        this.TakerTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + buyTok.TokenSymbol
       }
     }
   }

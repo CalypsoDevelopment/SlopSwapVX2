@@ -89,7 +89,7 @@ p {
 }
 .btn-primary {
   color: #fff;
-  background-color: #c1272d;
+  background-color: #f79594;
   border-color: #FFFFFF;
   font-family: 'Fredoka One', sans-serif;
   font-variant-caps: all-small-caps;
