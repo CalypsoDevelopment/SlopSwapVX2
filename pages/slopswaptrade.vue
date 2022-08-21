@@ -32,6 +32,6 @@ export default {
 .bg {
   min-height: 100vh;
   background: rgb(255,255,255);
-  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(46,163,230,1) 48%, rgba(255,158,46,1) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(46,163,230,1) 20%, rgba(255,158,46,1) 60%);
 }
 </style>

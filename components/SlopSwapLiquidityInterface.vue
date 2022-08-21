@@ -17,14 +17,33 @@
         width="100vw"
         backdrop
       >
-        <div class="text-center px-3 py-2">
-          <h1 class="text-center main-title">
-            <span class="purple">Slop</span>Swap <span class="purple">Liquidity Removal</span>
-          </h1>
+        <div class="text-center top-pair-images px-3 py-2">
           <b-container>
             <b-row>
               <b-col sm="12" md="12" lg="12">
-                <div>
+                <h1 class="text-center main-title mb-5">
+                  <span class="purple">Slop</span>Swap <span class="purple">Liquidity Removal</span>
+                </h1>
+              </b-col>
+              <b-col sm="12" md="12" lg="6">
+                <div class="my-3">
+                  <b-img
+                    :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+                    fluid
+                    alt="Selected token that user wants to trade"
+                    class="maker-token-img offset1"
+                  />
+                  <b-img
+                    :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+                    fluid
+                    alt="The Amount of SlopSwap Token Reserves"
+                    class="maker-token-img"
+                  />
+                  {{ PairAddress }}
+                </div>
+              </b-col>
+              <b-col sm="12" md="12" lg="6">
+                <div class="my-3">
                   <b-img
                     :src="require(`@/assets/img/branding/slopswap-token-v2.png`)"
                     class="maker-token-img"
@@ -33,8 +52,10 @@
                   />
                   SlopSwap LP Token Balance: {{ UserFormattedLPTokens }}
                 </div>
+              </b-col>
+              <b-col sm="12" md="12" lg="12">
                 <div>
-                  <label for="range-1">Use the Slider to Select the Amount of LP Tokens to Remove</label>
+                  <label class="range-slider-instructions" for="range-1"><i class="fa-solid fa-circle-1" /> Use the Slider to Select the Amount of LP Tokens to Remove</label>
                   <b-form-input
                     id="range-1"
                     v-model="liquidityRangeVal"
@@ -144,7 +165,7 @@
 
               <b-col>
                 <div class="segment-spacer">
-                  <hr class="slop-hr">
+                  <!--<hr class="slop-hr">-->
                 </div>
               </b-col>
 
@@ -1421,8 +1442,13 @@ export default {
     box-shadow: #5d3d42;
 }
 .slop-hr {
-  border: 2px solid #5d3d42;
+  border: 2px solid #FFFFFF;
   border-radius: 2px;
+}
+.top-pair-images {
+  min-height: 100vh;
+  background: rgb(255,255,255);
+  background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(46,163,230,1) 20%, rgba(255,158,46,1) 60%);
 }
 .maker-token-select-btn[data-v-66a8d999] {
     font-family: 'Fredoka One', sans-serif !important;
@@ -1461,10 +1487,36 @@ export default {
 .purple {
   color: #5d3d42;
 }
+label.range-slider-instructions {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  font-size: 1.8rem;
+  font-family: 'Fredoka One', sans-serif;
+}
 .left-liq-btn {
-  /* border-top-left-radius: 4rem;
-  border-bottom-left-radius: 4rem; */
+  border-top-left-radius: 4rem;
+  border-bottom-left-radius: 4rem;
   background-color: #5d3d42;
+}
+.input-group-lg > .input-group-prepend > .btn, .input-group-lg > .input-group-append > .btn {
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    border-top-left-radius: 4rem;
+    border-bottom-left-radius: 4rem;
+}
+.input-group-lg > .form-control {
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    border-top-right-radius: 4rem;
+    border-bottom-right-radius: 4rem;
+}
+.input-group > .form-control:not(:first-child), .input-group > .custom-select:not(:first-child) {
+    border-top-right-radius: 4rem;
+    border-bottom-right-radius: 4rem;
 }
 .segment-spacer {
   height: 4rem;
