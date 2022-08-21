@@ -1,335 +1,32 @@
 <template>
   <b-container class="liquidity-container">
+    <div>
+      <b-tabs pills content-class="mt-0">
+        <b-tab title="Add Liquidity" active>
+          <div>
+            <SlopSwapTradeInterface />
+          </div>
+        </b-tab>
+        <b-tab title="Remove Liquidity">
+          <div>
+            <SlopSwapTradeInterface />
+          </div>
+        </b-tab>
+        <b-tab title="Disabled">
+          <p>Liquidity Pools</p>
+        </b-tab>
+      </b-tabs>
+    </div>
     <div v-if="TransactionReceipt">
       <SlopSwapTXReceiptSidebar :receipt-data="TransactionReceipt" />
     </div>
-
-    <div>
-      <!--<b-button v-b-toggle.sidebar-remove-liquidity>
-        Remove Liquidity
-      </b-button>-->
-      <b-sidebar
-        id="sidebar-remove-liquidity"
-        class="liquidity-remove-bg text-center"
-        title="Liquidity Pool Specifications"
-        right
-        shadow
-        width="100vw"
-        backdrop
-      >
-        <div class="text-center px-3 py-2">
-          <h1 class="text-center main-title">
-            <span class="purple">Slop</span>Swap <span class="purple">Liquidity Removal</span>
-          </h1>
-          <b-container>
-            <b-row>
-              <b-col sm="12" md="12" lg="12">
-                <div>
-                  <b-img
-                    :src="require(`@/assets/img/branding/slopswap-token-v2.png`)"
-                    class="maker-token-img"
-                    fluid
-                    alt="SlopSwap Liquidity Token Balance"
-                  />
-                  SlopSwap LP Token Balance: {{ UserFormattedLPTokens }}
-                </div>
-                <div>
-                  <b-input-group
-                    v-if="CreatedPair"
-                    size="lg"
-                    class="mb-3 mt-3"
-                  >
-                    <b-input-group-prepend>
-                      <b-button class="left-liq-btn">
-                        <b-img
-                          :src="require(`@/assets/img/branding/slopswap-token-v2.png`)"
-                          class="smaller-maker-token-img"
-                          fluid
-                          alt="Responsive image"
-                        />
-                      </b-button>
-                      <b-input-group-text class="token-name">
-                        {{ CreatedPair.liquidityToken.name }}
-                      </b-input-group-text>
-                    </b-input-group-prepend>
-                    <b-form-input v-model="UserFormattedLPTokens" :value="UserFormattedLPTokens" placeholder="0.0" />
-                    <!--<b-input-group-append>
-                      </b-input-group-append>-->
-                  </b-input-group>
-                </div>
-              </b-col>
-              <b-col sm="12" md="12" lg="12">
-                <div>
-                  <label for="range-1">Select the Amount of LP Tokens to Remove</label>
-                  <b-form-input
-                    id="range-1"
-                    v-model="liquidityRangeVal"
-                    type="range"
-                    min="0"
-                    max="4"
-                    @change="DisplayPercentageValue()"
-                  />
-                  <div class="mt-2">
-                    Liquidity Percentage to Remove:
-                    <br>
-                    {{ SliderPercentDisplay }}
-                  </div>
-                </div>
-              </b-col>
-              <b-col sm="12" md="12" lg="6">
-                <div>
-                  <b-input-group
-                    v-if="CreatedPair"
-                    size="md"
-                    class="mb-3 mt-3"
-                  >
-                    <b-input-group-prepend>
-                      <b-button class="left-liq-btn">
-                        <b-img
-                          :src="require(`@/assets/img/tokens/${CreatedPair.tokenAmounts[0].currency.address}.png`)"
-                          class="smaller-maker-token-img"
-                          fluid
-                          alt="Responsive image"
-                        />
-                      </b-button>
-                      <b-input-group-text class="token-name">
-                        {{ CreatedPair.tokenAmounts[0].currency.name }}
-                      </b-input-group-text>
-                    </b-input-group-prepend>
-                    <b-form-input v-model="Aout" :value="Aout" />
-                    <!--<b-input-group-append>
-                      </b-input-group-append>-->
-                  </b-input-group>
-                </div>
-              </b-col>
-              <b-col sm="12" md="12" lg="6">
-                <div>
-                  <b-input-group
-                    v-if="CreatedPair"
-                    size="md"
-                    class="mb-3 mt-3"
-                  >
-                    <b-input-group-prepend>
-                      <b-button class="left-liq-btn">
-                        <b-img
-                          :src="require(`@/assets/img/tokens/${CreatedPair.tokenAmounts[1].currency.address}.png`)"
-                          class="smaller-maker-token-img"
-                          fluid
-                          alt="Responsive image"
-                        />
-                      </b-button>
-                      <b-input-group-text class="token-name">
-                        {{ CreatedPair.tokenAmounts[1].currency.name }}
-                      </b-input-group-text>
-                    </b-input-group-prepend>
-                    <b-form-input v-model="Bout" :value="Bout" />
-                    <!--<b-input-group-append>
-                      </b-input-group-append>-->
-                  </b-input-group>
-                </div>
-              </b-col>
-
-              <b-col sm="12" md="12" lg="12">
-                <div class="text-center my-3">
-                  <b-button-group class="">
-                    <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="removeLiquidityQuote()">
-                      Remove Liquidity Quote!
-                    </b-button>
-                    <b-button size="lg" class="right-group-btn" @click="removeLiquidity()">
-                      Remove Liquidity!
-                    </b-button>
-                  </b-button-group>
-                </div>
-              </b-col>
-
-              <b-col sm="12" md="12" lg="4">
-                <b-list-group class="mt-4 text-center">
-                  <b-list-group-item>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="The Amount of SlopSwap Token Reserves"
-                      class="maker-token-img"
-                    />
-                    <span class="feature-title">
-                      {{ MakerToken.TokenName }}
-                    </span>
-                    <br>
-                    {{ MakerToken.TokenContract }}
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      Reserves
-                    </h2>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                    {{ Reserve1 }} {{ MakerToken.TokenSymbol }}
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      Conversion
-                    </h2>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                    1
-                    {{ MakerToken.TokenSymbol }}
-                    <i class="fa-solid fa-scale-balanced fa2x icons" />
-                    {{ TakerMidPrice }}
-                    {{ TakerToken.TokenSymbol }}
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                  </b-list-group-item>
-                </b-list-group>
-              </b-col>
-              <b-col sm="12" md="12" lg="4">
-                <b-list-group class="mt-4 text-center">
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      Liquidity Pool Contract
-                    </h2>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img offset1"
-                    />
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="The Amount of SlopSwap Token Reserves"
-                      class="maker-token-img"
-                    />
-                    <br>
-                    {{ PairAddress }}
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <div class="text-center">
-                      <h2 class="secondary-title my-1">
-                        User LP Portion of the Pool
-                      </h2>
-                      {{ MakerToken.TokenSymbol }}|{{ TakerToken.TokenSymbol }}
-                      <br>
-                      {{ UserPortionOfPool }}%
-                    </div>
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      LP Pool Token Total Supply
-                    </h2>
-                    {{ PoolTotalSupply }}
-                  </b-list-group-item>
-                  <b-list-group-item v-if="LiquidityAddResult">
-                    <div>
-                      <span class="feature-title">
-                        Amount You Want to Sell
-                      </span>
-                      <br>
-                      {{ LiquidityAddResult.AmountADesired }}
-                    </div>
-                    <div>
-                      <span class="feature-title">
-                        Optimal Tokens B
-                      </span>
-                      <br>
-                      {{ LiquidityAddResult.AmountBOpt }}
-                    </div>
-                    <div>
-                      <span class="feature-title">
-                        Amount of LP Received
-                      </span>
-                      <br>
-                      {{ LiquidityAddResult.AmountOut }}
-                    </div>
-                  </b-list-group-item>
-                </b-list-group>
-              </b-col>
-              <b-col sm="12" md="12" lg="4">
-                <b-list-group class="mt-4 text-center">
-                  <b-list-group-item>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="The Amount of SlopSwap Token Reserves"
-                      class="maker-token-img"
-                    />
-                    <span class="feature-title">
-                      {{ TakerToken.TokenName }}
-                    </span>
-                    <br>
-                    {{ TakerToken.TokenContract }}
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      Reserves
-                    </h2>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                    {{ Reserve0 }} {{ TakerToken.TokenSymbol }}
-                  </b-list-group-item>
-                  <b-list-group-item>
-                    <h2 class="secondary-title my-1">
-                      Conversion
-                    </h2>
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                    1
-                    {{ TakerToken.TokenSymbol }}
-                    <i class="fa-solid fa-scale-balanced fa2x icons" />
-                    {{ MakerMidPrice }}
-                    {{ MakerToken.TokenSymbol }}
-                    <b-img
-                      :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
-                      fluid
-                      alt="Selected token that user wants to trade"
-                      class="maker-token-img"
-                    />
-                  </b-list-group-item>
-                  <!--
-                  <b-list-group-item>Porta ac consectetur ac</b-list-group-item>
-                  <b-list-group-item>Vestibulum at eros</b-list-group-item>
-                  -->
-                </b-list-group>
-              </b-col>
-            </b-row>
-          </b-container>
-        </div>
-        <template #footer="{ hide }">
-          <div class="d-flex bg-dark text-light align-items-center px-3 py-2">
-            <strong class="mr-auto">Footer</strong>
-            <b-button size="sm" @click="hide">
-              Close
-            </b-button>
-          </div>
-        </template>
-      </b-sidebar>
-    </div>
     <b-row>
-      <b-col sm="12" md="12" lg="12">
+      <!--<b-col sm="12" md="12" lg="12">
         <h1 class="text-center main-title">
           <span class="purple">Slop</span>Swap <span class="purple">Liquidity</span>
         </h1>
       </b-col>
-      <b-col sm="12" md="12" lg="12">
+      <b-col sm="12" medium="12" lg="12">
         <div>
           <b-nav class="config-btns">
             <b-nav-item active>
@@ -385,12 +82,6 @@
       <b-col sm="12" md="12" lg="12">
         <div class="text-center my-5">
           <b-button-group class="my-2">
-            <!--<b-button @click="GetTokenReserves()">
-              Get Reserves
-            </b-button>
-            <b-button @click="PairData()">
-              Get Pair Data
-            </b-button>-->
             <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="quoteAddLiquidity()">
               Add Liquidity Quote!
             </b-button>
@@ -399,15 +90,178 @@
             </b-button>
           </b-button-group>
           <br>
-          <b-button v-b-toggle.sidebar-remove-liquidity pill size="lg" class="left-group-btn" style="background-color: #5d3d42">
-            Open Liquidity Removal Panel
-          </b-button>
-          <br>
-          <!--<b-button pill class="remove-liquidity-btn mt-3" @click="GetPairPoolShare()">
-            Get User Portion Of Pool
-          </b-button>-->
+          <b-button-group class="">
+            <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="removeLiquidityQuote()">
+              Remove Liquidity Quote!
+            </b-button>
+            <b-button size="lg" class="right-group-btn" @click="removeLiquidity()">
+              Remove Liquidity!
+            </b-button>
+          </b-button-group>
         </div>
-      </b-col>
+      </b-col>-->
+    <b-col sm="12" md="12" lg="4">
+      <b-list-group class="mt-4 text-center">
+        <b-list-group-item>
+          <b-img
+            :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+            fluid
+            alt="The Amount of SlopSwap Token Reserves"
+            class="maker-token-img"
+          />
+          <span class="feature-title">
+            {{ MakerToken.TokenName }}
+          </span>
+          <br>
+          {{ MakerToken.TokenContract }}
+        </b-list-group-item>
+        <b-list-group-item>
+          <h2 class="secondary-title my-1">
+            Reserves
+          </h2>
+          <b-img
+            :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+          {{ Reserve1 }} {{ MakerToken.TokenSymbol }}
+        </b-list-group-item>
+        <b-list-group-item>
+          <h2 class="secondary-title my-1">
+            Conversion
+          </h2>
+          <b-img
+            :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+          1
+          {{ MakerToken.TokenSymbol }}
+          <i class="fa-solid fa-scale-balanced fa2x icons" />
+          {{ TakerMidPrice }}
+          {{ TakerToken.TokenSymbol }}
+          <b-img
+            :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+        </b-list-group-item>
+      </b-list-group>
+    </b-col>
+    <b-col sm="12" md="12" lg="4">
+      <b-list-group class="mt-4 text-center">
+        <b-list-group-item>
+          <h2 class="secondary-title my-1">
+            Liquidity Pool Contract
+          </h2>
+          <b-img
+            :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img offset1"
+          />
+          <b-img
+            :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+            fluid
+            alt="The Amount of SlopSwap Token Reserves"
+            class="maker-token-img"
+          />
+          <br>
+          {{ PairAddress }}
+        </b-list-group-item>
+        <b-list-group-item>
+          <div class="text-center">
+            <h2 class="secondary-title my-1">
+              User LP Portion of the Pool
+            </h2>
+            {{ MakerToken.TokenSymbol }}|{{ TakerToken.TokenSymbol }}
+            <br>
+            {{ UserPortionOfPool }}%
+          </div>
+        </b-list-group-item>
+        <b-list-group-item v-if="LiquidityAddResult">
+          <div>
+            <span class="feature-title">
+              Amount You Want to Sell
+            </span>
+            <br>
+            {{ LiquidityAddResult.AmountADesired }}
+          </div>
+          <div>
+            <span class="feature-title">
+              Optimal Tokens B
+            </span>
+            <br>
+            {{ LiquidityAddResult.AmountBOpt }}
+          </div>
+          <div>
+            <span class="feature-title">
+              Amount of LP Received
+            </span>
+            <br>
+            {{ LiquidityAddResult.AmountOut }}
+          </div>
+        </b-list-group-item>
+      </b-list-group>
+    </b-col>
+    <b-col sm="12" md="12" lg="4">
+      <b-list-group class="mt-4 text-center">
+        <b-list-group-item>
+          <b-img
+            :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+            fluid
+            alt="The Amount of SlopSwap Token Reserves"
+            class="maker-token-img"
+          />
+          <span class="feature-title">
+            {{ TakerToken.TokenName }}
+          </span>
+          <br>
+          {{ TakerToken.TokenContract }}
+        </b-list-group-item>
+        <b-list-group-item>
+          <h2 class="secondary-title my-1">
+            Reserves
+          </h2>
+          <b-img
+            :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+          {{ Reserve0 }} {{ TakerToken.TokenSymbol }}
+        </b-list-group-item>
+        <b-list-group-item>
+          <h2 class="secondary-title my-1">
+            Conversion
+          </h2>
+          <b-img
+            :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+          1
+          {{ TakerToken.TokenSymbol }}
+          <i class="fa-solid fa-scale-balanced fa2x icons" />
+          {{ MakerMidPrice }}
+          {{ MakerToken.TokenSymbol }}
+          <b-img
+            :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
+            fluid
+            alt="Selected token that user wants to trade"
+            class="maker-token-img"
+          />
+        </b-list-group-item>
+        <!--
+          <b-list-group-item>Porta ac consectetur ac</b-list-group-item>
+          <b-list-group-item>Vestibulum at eros</b-list-group-item>
+          -->
+      </b-list-group>
+    </b-col>
       <!--<b-col sm="12" md="12" lg="12">
       </b-col>
       <b-col sm="12" md="12" lg="12">
@@ -418,8 +272,8 @@
 <script>
 import { ChainId, Fetcher, Route, Token, Pair, TokenAmount } from '@uniswap/sdk'
 import detectEthereumProvider from '@metamask/detect-provider'
-import SlopSwapLiquidityMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
-import SlopSwapLiquidityTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
+// import SlopSwapLiquidityMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
+// import SlopSwapLiquidityTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
 import SlopSwapTXReceiptSidebar from '~/components/SlopSwapTXReceiptSidebar.vue'
 const axios = require('axios')
 const ethers = require('ethers')
@@ -433,7 +287,7 @@ const FACTORY = require('~/static/artifacts/SlopSwapFactory.json')
 export default {
   name: 'SlopSwapLiquidityInterface',
   components: {
-    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect, SlopSwapTXReceiptSidebar
+    SlopSwapTXReceiptSidebar
   },
   data () {
     return {
@@ -475,7 +329,6 @@ export default {
         { value: 0.24, text: '24% Slip' },
         { value: 0.25, text: '25% Slip' }
       ],
-      liquidityRangeVal: 0,
       TransactionReceipt: null,
       MakerMidPrice: null,
       TakerMidPrice: null,
@@ -499,18 +352,10 @@ export default {
       UserPortionOfPool: null,
       PoolTotalSupply: null,
       MakerTokenUserBalance: null,
-      TakerTokenUserBalance: null,
-      UserFormattedLPTokens: null,
-      Aout: null,
-      Bout: null,
-      liquidityAmount: null,
-      SliderPercentDisplay: null
+      TakerTokenUserBalance: null
     }
   },
   watch: {
-    liquidityRangeVal (value) {
-      this.DisplayPercentageValue()
-    },
     TakerMidPrice (value) {
       this.GetTokenReserves()
     },
@@ -543,12 +388,10 @@ export default {
     async GetPairPoolShare () {
       const PairContractInstance = new ethers.Contract(this.PairAddress, PAIR.abi, this.signer)
       const retrieveLPTokenBalance = await PairContractInstance.balanceOf(String(this.account))
-      this.UserLPBalanceRaw = retrieveLPTokenBalance
       const PoolTotalSupply = await PairContractInstance.totalSupply()
       this.PoolTotalSupply = ethers.utils.formatEther(PoolTotalSupply)
-      const userPoolFormattedBalance = ethers.utils.formatEther(this.UserLPBalanceRaw)
-      this.UserFormattedLPTokens = userPoolFormattedBalance
-      const UserPoolShare = this.UserFormattedLPTokens / this.PoolTotalSupply
+      const userPoolFormattedBalance = ethers.utils.formatEther(retrieveLPTokenBalance)
+      const UserPoolShare = userPoolFormattedBalance / this.PoolTotalSupply
       const ConvertPercentage = UserPoolShare * 100
       this.UserPortionOfPool = ConvertPercentage
     },
@@ -700,81 +543,36 @@ export default {
         this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       }
     },
-    DisplayPercentageValue () {
-      switch (this.liquidityRangeVal) {
-        case '0':
-          // code block
-          this.SliderPercentDisplay = '0%'
-          break
-        case '1':
-          // code block
-          this.SliderPercentDisplay = '25%'
-          break
-        case '2':
-          // code block
-          this.SliderPercentDisplay = '50%'
-          break
-        case '3':
-          // code block
-          this.SliderPercentDisplay = '75%'
-          break
-        case '4':
-          // code block
-          this.SliderPercentDisplay = '100%'
-          break
-        default:
-          // code block
-      }
-    },
-    CalculateSliderRangeLiquidity () {
-      // Users Base Formatted Liquidity Token Balance
-      const UserLPTokenBalance = this.UserFormattedLPTokens
-      const QuarterDivideLiquidity = Number(UserLPTokenBalance) / 4
-      alert('Quarter Divided Liquidity: ' + QuarterDivideLiquidity)
-      // The Slider Range
-      const SliderRange = this.liquidityRangeVal
-      //
-      const CalculatedLiquidityVal = QuarterDivideLiquidity * SliderRange
-      const liquidity = CalculatedLiquidityVal
-      alert(liquidity)
-      return liquidity
-    },
     async removeLiquidityQuote () {
+      const liquidity = this.liquidityAmount
       const address1 = this.MakerToken.TokenContract
       const address2 = this.TakerToken.TokenContract
-      const pairAddress = await this.factory.getPair(address1, address2)
-      alert('pair address: ' + pairAddress)
+      const pairAddress = this.PairAddress
+      alert('pair address', pairAddress)
       const pair = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
 
-      const reservesRaw = await pair.getReserves() // Returns the reserves already formated as ethers
+      const reservesRaw = await this.fetchReserves(address1, address2, pair) // Returns the reserves already formated as ethers
       const reserveA = reservesRaw[0]
       const reserveB = reservesRaw[1]
 
-      const liquidity = this.CalculateSliderRangeLiquidity()
-
-      const feeOn = (await this.factory.feeTo()) !== 0x0000000000000000000000000000000000000000
+      const feeOn =
+        (await this.factory.feeTo()) !== 0x0000000000000000000000000000000000000000
 
       const _kLast = await pair.kLast()
-      alert('_kLast: ' + _kLast)
       const kLast = Number(ethers.utils.formatEther(_kLast))
-      alert('kLast: ' + kLast)
 
       const _totalSupply = await pair.totalSupply()
-      alert('_totalSupply: ' + _totalSupply)
       let totalSupply = Number(ethers.utils.formatEther(_totalSupply))
-      alert('totalSupply: ' + totalSupply)
 
       if (feeOn && kLast > 0) {
-        alert('feeOn && kLast is Greater then 0')
         const feeLiquidity =
           (totalSupply * (Math.sqrt(reserveA * reserveB) - Math.sqrt(kLast))) /
           (5 * Math.sqrt(reserveA * reserveB) + Math.sqrt(kLast))
         totalSupply = totalSupply + feeLiquidity
       }
+
       const Aout = (reserveA * liquidity) / totalSupply
-      this.Aout = ethers.utils.formatUnits(String(Aout), 'ether')
       const Bout = (reserveB * liquidity) / totalSupply
-      this.Bout = ethers.utils.formatUnits(String(Bout), 'ether')
 
       return [liquidity, Aout, Bout]
     },
@@ -928,8 +726,8 @@ export default {
       try {
         const reservesRaw = await pair.getReserves()
         const results = [
-          Number(ethers.utils.formatUnits(reservesRaw[0], this.MakerToken.TokenDecimal)),
-          Number(ethers.utils.formatUnits(reservesRaw[1], this.TakerToken.TokenDecimal))
+          Number(ethers.utils.formatEther(reservesRaw[0])),
+          Number(ethers.utils.formatEther(reservesRaw[1]))
         ]
 
         return [
@@ -1429,11 +1227,6 @@ export default {
 .purple {
   color: #5d3d42;
 }
-.left-liq-btn {
-  /* border-top-left-radius: 4rem;
-  border-bottom-left-radius: 4rem; */
-  background-color: #5d3d42;
-}
 .white {
   color: #FFFFFF;
 }
@@ -1505,9 +1298,6 @@ export default {
 }
 .amounts {
   border-radius: 4rem;
-}
-.smaller-maker-token-img {
-  max-height: 22px;
 }
 .maker-token-img {
   max-height: 32px;

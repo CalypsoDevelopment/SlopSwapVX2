@@ -1,7 +1,7 @@
 <template>
   <b-container>
-    <b-row class="transaction-bg my-5 mx-2 px-4 py-5">
-      <b-col class="text-left">
+    <b-row class="transaction-bg mx-2 px-4 mt-2">
+      <b-col class="text-left" sm="12" md="12" lg="12">
         <div>
           <b-nav class="config-nav">
             <b-nav-item active>
@@ -16,7 +16,7 @@
           </b-nav>
         </div>
       </b-col>
-      <b-col sm="12" md="12" lg="12" class="text-center my-4">
+      <b-col sm="12" md="12" lg="6" class="text-center my-2">
         <div class="token-selector">
           <b-input-group class="selector-container">
             <template #prepend>
@@ -38,12 +38,12 @@
           </b-input-group>
         </div>
       </b-col>
-      <b-col class="text-center">
+      <!--<b-col class="text-center">
         <b-button pill class="px-2 py-1">
           <i class="fa-solid fa-repeat" />
         </b-button>
-      </b-col>
-      <b-col sm="12" md="12" lg="12" class="text-center my-4">
+      </b-col>-->
+      <b-col sm="12" md="12" lg="6" class="text-center my-2">
         <div class="token-selector">
           <b-input-group>
             <template #prepend>
