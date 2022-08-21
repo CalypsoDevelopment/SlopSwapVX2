@@ -34,6 +34,22 @@
                   SlopSwap LP Token Balance: {{ UserFormattedLPTokens }}
                 </div>
                 <div>
+                  <label for="range-1">Use the Slider to Select the Amount of LP Tokens to Remove</label>
+                  <b-form-input
+                    id="range-1"
+                    v-model="liquidityRangeVal"
+                    type="range"
+                    min="0"
+                    max="4"
+                    @change="DisplayPercentageValue()"
+                  />
+                  <div class="mt-2">
+                    Liquidity Percentage to Remove:
+                    <br>
+                    {{ SliderPercentDisplay }}
+                  </div>
+                </div>
+                <div>
                   <b-input-group
                     v-if="CreatedPair"
                     size="lg"
@@ -52,30 +68,13 @@
                         {{ CreatedPair.liquidityToken.name }}
                       </b-input-group-text>
                     </b-input-group-prepend>
-                    <b-form-input v-model="UserFormattedLPTokens" :value="UserFormattedLPTokens" placeholder="0.0" />
+                    <b-form-input v-model="CalculatedLiquidityVal" :value="CalculatedLiquidityVal" placeholder="0.0" />
                     <!--<b-input-group-append>
                       </b-input-group-append>-->
                   </b-input-group>
                 </div>
               </b-col>
-              <b-col sm="12" md="12" lg="12">
-                <div>
-                  <label for="range-1">Select the Amount of LP Tokens to Remove</label>
-                  <b-form-input
-                    id="range-1"
-                    v-model="liquidityRangeVal"
-                    type="range"
-                    min="0"
-                    max="4"
-                    @change="DisplayPercentageValue()"
-                  />
-                  <div class="mt-2">
-                    Liquidity Percentage to Remove:
-                    <br>
-                    {{ SliderPercentDisplay }}
-                  </div>
-                </div>
-              </b-col>
+
               <b-col sm="12" md="12" lg="6">
                 <div>
                   <b-input-group
@@ -102,6 +101,7 @@
                   </b-input-group>
                 </div>
               </b-col>
+
               <b-col sm="12" md="12" lg="6">
                 <div>
                   <b-input-group
@@ -142,6 +142,17 @@
                 </div>
               </b-col>
 
+              <b-col>
+                <div class="segment-spacer">
+                  <hr class="slop-hr">
+                </div>
+              </b-col>
+
+              <b-col sm="12" md="12" lg="12">
+                <h1 class="text-center main-title">
+                  <span class="purple">Liquidity </span>Pool <span class="purple">Specifications</span>
+                </h1>
+              </b-col>
               <b-col sm="12" md="12" lg="4">
                 <b-list-group class="mt-4 text-center">
                   <b-list-group-item>
@@ -504,7 +515,8 @@ export default {
       Aout: null,
       Bout: null,
       liquidityAmount: null,
-      SliderPercentDisplay: null
+      SliderPercentDisplay: null,
+      CalculatedLiquidityVal: null
     }
   },
   watch: {
@@ -705,22 +717,27 @@ export default {
         case '0':
           // code block
           this.SliderPercentDisplay = '0%'
+          this.removeLiquidityQuote()
           break
         case '1':
           // code block
           this.SliderPercentDisplay = '25%'
+          this.removeLiquidityQuote()
           break
         case '2':
           // code block
           this.SliderPercentDisplay = '50%'
+          this.removeLiquidityQuote()
           break
         case '3':
           // code block
           this.SliderPercentDisplay = '75%'
+          this.removeLiquidityQuote()
           break
         case '4':
           // code block
           this.SliderPercentDisplay = '100%'
+          this.removeLiquidityQuote()
           break
         default:
           // code block
@@ -730,20 +747,21 @@ export default {
       // Users Base Formatted Liquidity Token Balance
       const UserLPTokenBalance = this.UserFormattedLPTokens
       const QuarterDivideLiquidity = Number(UserLPTokenBalance) / 4
-      alert('Quarter Divided Liquidity: ' + QuarterDivideLiquidity)
+      // alert('Quarter Divided Liquidity: ' + QuarterDivideLiquidity)
       // The Slider Range
       const SliderRange = this.liquidityRangeVal
       //
       const CalculatedLiquidityVal = QuarterDivideLiquidity * SliderRange
       const liquidity = CalculatedLiquidityVal
-      alert(liquidity)
+      this.CalculatedLiquidityVal = CalculatedLiquidityVal
+      // alert(liquidity)
       return liquidity
     },
     async removeLiquidityQuote () {
       const address1 = this.MakerToken.TokenContract
       const address2 = this.TakerToken.TokenContract
       const pairAddress = await this.factory.getPair(address1, address2)
-      alert('pair address: ' + pairAddress)
+      // alert('pair address: ' + pairAddress)
       const pair = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
 
       const reservesRaw = await pair.getReserves() // Returns the reserves already formated as ethers
@@ -755,22 +773,23 @@ export default {
       const feeOn = (await this.factory.feeTo()) !== 0x0000000000000000000000000000000000000000
 
       const _kLast = await pair.kLast()
-      alert('_kLast: ' + _kLast)
+      // alert('_kLast: ' + _kLast)
       const kLast = Number(ethers.utils.formatEther(_kLast))
-      alert('kLast: ' + kLast)
+      // alert('kLast: ' + kLast)
 
       const _totalSupply = await pair.totalSupply()
-      alert('_totalSupply: ' + _totalSupply)
+      // alert('_totalSupply: ' + _totalSupply)
       let totalSupply = Number(ethers.utils.formatEther(_totalSupply))
-      alert('totalSupply: ' + totalSupply)
+      // alert('totalSupply: ' + totalSupply)
 
       if (feeOn && kLast > 0) {
-        alert('feeOn && kLast is Greater then 0')
+        // alert('feeOn && kLast is Greater then 0')
         const feeLiquidity =
           (totalSupply * (Math.sqrt(reserveA * reserveB) - Math.sqrt(kLast))) /
           (5 * Math.sqrt(reserveA * reserveB) + Math.sqrt(kLast))
         totalSupply = totalSupply + feeLiquidity
       }
+      this.Liquidity = liquidity
       const Aout = (reserveA * liquidity) / totalSupply
       this.Aout = ethers.utils.formatUnits(String(Aout), 'ether')
       const Bout = (reserveB * liquidity) / totalSupply
@@ -1392,6 +1411,19 @@ export default {
   position: relative;
   right: -10px;
 }
+-webkit-slider-thumb:active {
+    background-color: #5d3d42;
+}
+-webkit-slider-thumb,
+.custom-range:focus::-webkit-slider-thumb,
+.custom-range:focus::-moz-range-thumb,
+.custom-range:focus::-ms-thumb {
+    box-shadow: #5d3d42;
+}
+.slop-hr {
+  border: 2px solid #5d3d42;
+  border-radius: 2px;
+}
 .maker-token-select-btn[data-v-66a8d999] {
     font-family: 'Fredoka One', sans-serif !important;
     color: #FFFFFF;
@@ -1433,6 +1465,9 @@ export default {
   /* border-top-left-radius: 4rem;
   border-bottom-left-radius: 4rem; */
   background-color: #5d3d42;
+}
+.segment-spacer {
+  height: 4rem;
 }
 .white {
   color: #FFFFFF;
@@ -1521,6 +1556,7 @@ export default {
   font-variant-caps: all-small-caps;
   font-size: 0.85rem;
   background-color: #5d3d42;
+  padding: 1rem;
 }
 .right-group-btn {
   border-top-right-radius: 4rem;
