@@ -54,7 +54,7 @@ p {
 }
 .btn-primary {
   color: #fff;
-  background-color: #5d3d42;
+  background-color: #212529;
   border-color: #FFFFFF;
   font-family: 'Fredoka One', sans-serif;
   font-variant-caps: all-small-caps;

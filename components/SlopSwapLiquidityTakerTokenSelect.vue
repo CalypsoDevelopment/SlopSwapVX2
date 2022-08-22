@@ -1,16 +1,16 @@
 <template>
   <b-container class="text-center">
-    <b-row class="taker-token-container">
+    <b-row class="liquidity-taker-token-container">
       <b-col class="px-0">
-        <div class="ttoken-select-container">
+        <div class="liquidity-ttoken-select-container">
           <b-button
-            id="taker-button"
+            id="liquidity-taker-button"
             class="liquidity-taker-token-select-btn"
             block
             :change-token="TakerTokenPass"
             :chain-id="chain"
             style="background-color: #5d3d42"
-            @click="$bvModal.show('takerselect')"
+            @click="$bvModal.show('liquiditytakerselect')"
           >
             <b-img
               :src="require(`@/assets/img/tokens/${TakerToken.TokenContract}.png`)"
@@ -23,7 +23,7 @@
           </b-button>
 
           <b-modal
-            id="takerselect"
+            id="liquiditytakerselect"
             title="Select Trading Token"
             no-close-on-esc
             no-close-on-backdrop
@@ -115,18 +115,18 @@ export default {
   } // END OF METHODS
 } // END OF EXPORT DEFAULT
 </script>
-<style>
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-.taker-token-container {
+.liquidity-taker-token-container {
   margin-top: 2rem;
   margin-bottom:2rem;
 }
-.ttoken-select-container {
+.liquidity-ttoken-select-container {
   /* padding: 1rem; */
   /* background-color: #FFFFFF; */
   border-radius: 4rem;
 }
-.ttoken-select-container .taker-token-select-btn[data-v-87d4939c] {
+.liquidity-ttoken-select-container .liquidity-taker-token-select-btn {
     font-family: 'Fredoka One', sans-serif !important;
     color: #FFFFFF;
     font-feature-settings: "smcp", "c2sc";
@@ -141,7 +141,7 @@ export default {
     background-color: #5d3d42 !important;
 }
 
-#taker-button {
+#liquidity-taker-button {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;

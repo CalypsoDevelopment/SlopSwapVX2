@@ -19,12 +19,12 @@
           <b-nav-item to="/slopswapliquidity">
             Liquidity
           </b-nav-item>
-          <b-nav-item to="/zeroxprotocol">
-            0x Trade
+          <b-nav-item to="/tokenexplorer">
+            Token Explorer
           </b-nav-item>
-          <b-nav-item to="/liquiditytoken">
+          <!-- <b-nav-item to="/liquiditytoken">
             Liquidity Token Gen
-          </b-nav-item>
+          </b-nav-item> -->
           <b-nav-item to="/">
             News
           </b-nav-item>

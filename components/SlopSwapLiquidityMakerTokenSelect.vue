@@ -1,16 +1,16 @@
 <template>
   <b-container class="text-center">
-    <b-row class="maker-token-container px-0">
+    <b-row class="liquidity-maker-token-container px-0">
       <b-col class="px-0">
-        <div class="mtoken-select-container mx-0">
+        <div class="liquidity-mtoken-select-container mx-0">
           <b-button
-            id="maker-btn"
-            class="maker-token-select-btn"
+            id="liquidity-maker-btn"
+            class="liquidity-maker-token-select-btn"
             block
             :change-token="MakerTokenPass"
             :chain-id="chain"
             variant="none"
-            @click="$bvModal.show('makerselect')"
+            @click="$bvModal.show('liquiditymakerselect')"
           >
             <b-img
               :src="require(`@/assets/img/tokens/${MakerToken.TokenContract}.png`)"
@@ -23,7 +23,7 @@
           </b-button>
 
           <b-modal
-            id="makerselect"
+            id="liquiditymakerselect"
             title="Select Trading Token"
             no-close-on-esc
             no-close-on-backdrop
@@ -138,18 +138,18 @@ export default {
   } // END OF METHODS
 } // END OF EXPORT DEFAULT
 </script>
-<style>
+<style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
-.maker-token-container {
+.liquidity-maker-token-container {
   margin-top: 2rem;
   margin-bottom:2rem;
 }
-.mtoken-select-container {
+.liquidity-mtoken-select-container {
   /* padding: 1rem; */
   /* background-color: #FFFFFF; */
   border-radius: 4rem;
 }
-.maker-token-select-btn[data-v-66a8d999] {
+.liquidity-maker-token-select-btn {
     font-family: 'Fredoka One', sans-serif !important;
     color: #FFFFFF;
     font-feature-settings: "smcp", "c2sc";
@@ -163,7 +163,7 @@ export default {
     border-color: #FFFFFF;
     background-color: #5d3d42 !important;
 }
-.mtoken-select-container .maker-token-select-btn[data-v-66a8d999] {
+.liquidity-mtoken-select-container .liquidity-maker-token-select-btn {
     font-family: 'Fredoka One', sans-serif !important;
     color: #FFFFFF;
     font-feature-settings: "smcp", "c2sc";
@@ -178,7 +178,7 @@ export default {
     background-color: #5d3d42 !important;
 }
 
-#maker-btn {
+#liquidity-maker-btn {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;

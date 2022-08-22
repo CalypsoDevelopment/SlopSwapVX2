@@ -3,38 +3,6 @@
     <b-row>
       <b-col sm="12" medium="12" lg="12">
         <div class="mt-5">
-          <b-nav class="config-btns">
-            <b-nav-item active>
-              <b-button v-b-popover.hover.top="'Trade settings and configuration options'" v-b-toggle.TXSettingsConfig pill>
-                <i class="fa-solid fa-gears" style="color: #3E3D40;" />
-              </b-button>
-              <SlopSwapTradeConfiguration />
-            </b-nav-item>
-            <b-nav-item>
-              <b-button v-b-popover.hover.top="'Trade transaction history specifications'" v-b-toggle.TXHistory pill>
-                <i class="fa-solid fa-clock-rotate-left" style="color: #3E3D40;" />
-              </b-button>
-              <SlopSwapTXHistory />
-            </b-nav-item>
-            <b-nav-item>
-              <b-button v-b-popover.hover.top="'Token pair trading chart'" v-b-toggle.TradingPairGraph pill>
-                <i class="fa-solid fa-chart-area" style="color: #3E3D40;" />
-              </b-button>
-              <SlopSwapPairGraphSidebar />
-            </b-nav-item>
-            <b-nav-item>
-              <b-button v-b-popover.hover.top="'Trading pair data &amp; information'" v-b-toggle.TradingPairGraph pill>
-                <i class="fa-solid fa-memo-circle-info" style="color: #3E3D40;" />
-              </b-button>
-            </b-nav-item>
-            <b-nav-item>
-              <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes. We include a slippage percentage option because of the the dynamic price swings in crypto. The price of an asset can fluctuate often depending on trade volume and activity.'" class="slippage-selector slippage-title" :options="SlippageOptions" />
-            </b-nav-item>
-          </b-nav>
-        </div>
-      </b-col>
-      <b-col sm="12" medium="12" lg="12">
-        <div>
           <h1 class="main-title">
             Slop<span class="red">Swap</span> Trading
           </h1>
@@ -60,19 +28,56 @@
           />
         </div>
       </b-col>
+      <b-col sm="12" medium="12" lg="12">
+        <div class="mt-2">
+          <b-nav class="config-btns">
+            <b-nav-item active>
+              <b-button v-b-popover.hover.top="'Trade settings and configuration options'" v-b-toggle.TXSettingsConfig pill>
+                <i class="fa-solid fa-gears" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTradeConfiguration />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-popover.hover.top="'View your most recent Trade Transaction Receipt'" v-b-toggle.TXHistory pill>
+                <i class="fa-solid fa-memo-circle-info" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTXHistory :txreceipt="TXreceipt" />
+            </b-nav-item>
+            <b-nav-item>
+              <b-button v-b-popover.hover.top="'Token pair trading chart'" v-b-toggle.TradingPairGraph pill>
+                <i class="fa-solid fa-chart-area" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapPairGraphSidebar />
+            </b-nav-item>
+            <b-nav-item>
+              <!--<b-button v-b-popover.hover.top="'Trading pair data &amp; information'" v-b-toggle.TradingPairGraph pill>
+              </b-button>-->
+            </b-nav-item>
+            <b-nav-item>
+              <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes. We include a slippage percentage option because of the the dynamic price swings in crypto. The price of an asset can fluctuate often depending on trade volume and activity.'" class="slippage-selector slippage-title" :options="SlippageOptions" />
+            </b-nav-item>
+          </b-nav>
+        </div>
+      </b-col>
       <b-col sm="12" md="12" lg="5">
         <SlopSwapMakerTokenSelect :change-token="MakerToken" :chain="chainID" @changeMakerToken="ChangeSellToken($event)" @changeMakerTokenBalance="MakerReCheckBalance($event)" />
         <b-form-input v-model="sellAmount" class="amounts" :value="sellAmount" placeholder="0.0" @change="SlopSwapMidPriceQuote()" />
+        <div class="text-center mt-1 mb-1">
+          <span class="label-title"><strong>Wallet Balance:</strong> {{ MakerTokenUserBalance }}</span>
+        </div>
       </b-col>
       <b-col sm="12" md="12" lg="2">
         <div class="mt-5">
-          <b-img src="~/assets/img/page-graphics/trade2.svg" class="center-trade-char" fluid alt="Responsive image" />
+          <b-img src="~/assets/img/page-graphics/trade2.svg" class="center-trade-char" fluid alt="The SlopSwap Chicken Chasing a Worm" />
           <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
         </div>
       </b-col>
       <b-col sm="12" md="12" lg="5">
         <SlopSwapTakerTokenSelect :change-token="TakerToken" :chain="chainID" @changeTakerToken="ChangeBuyToken($event)" @changeTakerTokenBalance="TakerReCheckBalance($event)" />
         <b-form-input v-model="SlopQuoteAmount" class="amounts" :value="SlopQuoteAmount" placeholder="0.0" />
+        <div class="text-center mt-1 mb-1">
+          <span class="label-title"><strong>Wallet Balance:</strong> {{ TakerTokenUserBalance }}</span>
+        </div>
       </b-col>
       <b-col sm="12" md="12" lg="12">
         <div class="text-center my-2">
@@ -83,11 +88,8 @@
           </b-button-group>
         </div>
       </b-col>
-      <b-col>
-        <div v-if="TXreceipt">
-          {{ TXreceipt }}
-        </div>
-      </b-col>
+      <!-- <b-col>
+      </b-col> -->
     </b-row>
   </b-container>
 </template>
@@ -97,6 +99,7 @@ import { ChainId, Pair, Token, Fetcher, Trade, Route, TokenAmount, TradeType, Pe
 import detectEthereumProvider from '@metamask/detect-provider'
 import SlopSwapMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
 import SlopSwapTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
+import SlopSwapTXHistory from '~/components/SlopSwapTXHistory.vue'
 // const axios = require('axios')
 const ethers = require('ethers')
 // const qs = require('qs')
@@ -108,7 +111,7 @@ const ERC20 = require('~/static/artifacts/IERC20.json')
 
 export default {
   name: 'SlopSwapTrader',
-  components: { SlopSwapMakerTokenSelect, SlopSwapTakerTokenSelect },
+  components: { SlopSwapMakerTokenSelect, SlopSwapTakerTokenSelect, SlopSwapTXHistory },
   data () {
     return {
       MainnetFactory: '0x7914BfaC79d35B1b521268cE4C431F112f4608fb',
@@ -131,7 +134,7 @@ export default {
       account: null,
       TakerMidPrice: null,
       SlopQuoteAmount: null,
-      SlippageSelected: 50,
+      SlippageSelected: 200,
       SlippageOptions: [
         { value: 50, text: 'Slippage' },
         { value: 100, text: '1% Slippage' },
@@ -160,7 +163,9 @@ export default {
         { value: 2400, text: '24% Slippage' },
         { value: 2500, text: '25% Slippage' }
       ],
-      TXreceipt: null
+      TXreceipt: null,
+      MakerTokenUserBalance: null,
+      TakerTokenUserBalance: null
     }
   },
   watch: {
@@ -224,10 +229,10 @@ export default {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
       this.tokenA = tokenA
-      alert(tokenA.name)
+      // alert(tokenA.name)
       const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
       this.tokenB = tokenB
-      alert(tokenB.name)
+      // alert(tokenB.name)
 
       // note that you may want/need to handle this async code differently,
       // for example if top-level await is not an option
@@ -267,8 +272,7 @@ export default {
       const maxApproval = new BigNumber(2).pow(256).minus(1)
       // alert('Max Approval: ' + maxApproval)
 
-      const approveTokenAmount = await TokenAContractInstance.approve(this.MainnetRouter, String(maxApproval))
-      alert(approveTokenAmount)
+      await TokenAContractInstance.approve(this.MainnetRouter, String(maxApproval))
 
       let tx
       if (tokenA.address === wethAddress) {
@@ -303,6 +307,7 @@ export default {
       this.TXreceipt = receipt
       this.SlopQuoteAmount = null
       this.sellAmount = null
+      this.$root.$emit('bv::toggle::collapse', 'TXHistory')
       // alert(this.TXreceipt)
     },
     async ChangePairMidPrice () {
@@ -335,65 +340,6 @@ export default {
       // alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
       this.TakerMidPrice = route.midPrice.toSignificant(10)
     },
-    async checkBalance () {
-      // Define Token A & B
-      // Establish the connection to the User wallet & query Token A (Primary Liquidity Token) balance within the wallet
-      // A Web3Provider wraps a standard Web3 provider, which ism
-      // what MetaMask injects as window.ethereum into each page
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-
-      // MetaMask requires requesting permission to connect users accounts
-      await provider.send('eth_requestAccounts', [])
-
-      // The MetaMask plugin also allows signing transactions to
-      // send ether and pay to change state within the blockchain.
-      // For this, you need the account signer...
-      // const signer = provider.getSigner()
-      // alert('Signer: ' + signer)
-
-      const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
-      // this.UserAccount = account.address
-      // alert('Wallet User: ' + account)
-      // alert('Before Token Symbol')
-      this.chainID = provider.network.chainId
-      this.BlockchainRadioSelected = provider.network.chainId
-
-      if (this.sellToken.TokenSymbol === 'WBNB') {
-        // Get Token Balance through Metamask
-        const sellTokenBalance = await provider.getBalance(String(account))
-        // alert(TokenABalance)
-        const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
-        // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
-
-        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + this.sellToken.TokenSymbol
-      } else {
-        const BEP20sellToken = new ethers.Contract(
-          this.sellToken.TokenContract, [
-            'function name() view returns (string)',
-            'function symbol() view returns (string)',
-            'function balanceOf(address) view returns (uint)'
-          ],
-          provider
-        )
-        const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
-        // alert(TokenAbalance)
-        const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), this.sellToken.TokenDecimal)
-        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + this.sellToken.TokenSymbol
-      }
-      const BEP20BuyToken = new ethers.Contract(
-        this.buyToken.TokenContract, [
-          'function name() view returns (string)',
-          'function symbol() view returns (string)',
-          'function balanceOf(address) view returns (uint)'
-        ],
-        provider
-      )
-
-      const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
-      // alert(buyTokenbalance)
-      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), this.buyToken.TokenDecimal)
-      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + this.buyToken.TokenSymbol
-    },
     async OnLoadCheckWalletStatus () {
       const provider = await detectEthereumProvider()
       if (provider) {
@@ -417,6 +363,7 @@ export default {
       if (this.account !== null) {
         this.loggedIn = true
       }
+      this.checkBalance()
     },
     SlopSwapMidPriceQuote () {
       const SlopSwapTradeQuote = this.sellAmount * this.TakerMidPrice
@@ -439,6 +386,65 @@ export default {
       this.SlopQuoteAmount = null
       this.BuyTokenAmount = null
       this.ChangePairMidPrice()
+    },
+    async checkBalance () {
+      // Define Token A & B
+      // Establish the connection to the User wallet & query Token A (Primary Liquidity Token) balance within the wallet
+      // A Web3Provider wraps a standard Web3 provider, which ism
+      // what MetaMask injects as window.ethereum into each page
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+      // MetaMask requires requesting permission to connect users accounts
+      await provider.send('eth_requestAccounts', [])
+
+      // The MetaMask plugin also allows signing transactions to
+      // send ether and pay to change state within the blockchain.
+      // For this, you need the account signer...
+      // const signer = provider.getSigner()
+      // alert('Signer: ' + signer)
+
+      const account = await window.ethereum.request({ method: 'eth_requestAccounts' })
+      // this.UserAccount = account.address
+      // alert('Wallet User: ' + account)
+      // alert('Before Token Symbol')
+      this.chainID = provider.network.chainId
+      this.BlockchainRadioSelected = provider.network.chainId
+
+      if (this.MakerToken.TokenSymbol === 'WBNB') {
+        // Get Token Balance through Metamask
+        const MakerTokenBalance = await provider.getBalance(String(account))
+        // alert(TokenABalance)
+        const ReturnMakerTokenBalance = ethers.utils.formatEther(String(MakerTokenBalance))
+        // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
+
+        this.MakerTokenUserBalance = ReturnMakerTokenBalance.substring(0, 6) + ' ' + this.MakerToken.TokenSymbol
+      } else {
+        const BEP20MakerToken = new ethers.Contract(
+          this.MakerToken.TokenContract, [
+            'function name() view returns (string)',
+            'function symbol() view returns (string)',
+            'function balanceOf(address) view returns (uint)'
+          ],
+          provider
+        )
+        const MakerTokenbalance = await BEP20MakerToken.balanceOf(String(account))
+        // alert(TokenAbalance)
+        const ReturnMakerTokenbalance = ethers.utils.formatUnits(String(MakerTokenbalance), this.MakerToken.TokenDecimal)
+        this.MakerTokenUserBalance = ReturnMakerTokenbalance.substring(0, 8) + ' ' + this.MakerToken.TokenSymbol
+      }
+      const BEP20TakerToken = new ethers.Contract(
+        this.TakerToken.TokenContract, [
+          'function name() view returns (string)',
+          'function symbol() view returns (string)',
+          'function balanceOf(address) view returns (uint)'
+        ],
+        provider
+      )
+
+      const TakerTokenbalance = await BEP20TakerToken.balanceOf(String(account))
+      // alert(buyTokenbalance)
+      const ReturnTakerTokenbalance = ethers.utils.formatUnits(String(TakerTokenbalance), this.TakerToken.TokenDecimal)
+      this.TakerTokenUserBalance = ReturnTakerTokenbalance.substring(0, 8) + ' ' + this.TakerToken.TokenSymbol
     },
     async MakerReCheckBalance (sellTok) {
       // Define Token A & B
@@ -468,7 +474,7 @@ export default {
         const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
         // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
 
-        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + sellTok.TokenSymbol
+        this.MakerTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + sellTok.TokenSymbol
       } else {
         const BEP20sellToken = new ethers.Contract(
           sellTok.TokenContract, [
@@ -481,7 +487,7 @@ export default {
         const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
         // alert(TokenAbalance)
         const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), sellTok.TokenDecimal)
-        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+        this.MakerTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
       }
       const BEP20BuyToken = new ethers.Contract(
         sellTok.TokenContract, [
@@ -492,10 +498,10 @@ export default {
         provider
       )
 
-      const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
+      const sellTokTokenbalance = await BEP20BuyToken.balanceOf(String(account))
       // alert(buyTokenbalance)
-      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), sellTok.TokenDecimal)
-      this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+      const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(sellTokTokenbalance), sellTok.TokenDecimal)
+      this.MakerTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
     },
     async TakerReCheckBalance (buyTok) {
       // Define Token A & B
@@ -524,7 +530,7 @@ export default {
         const ReturnBuyTokenBalance = ethers.utils.formatEther(String(buyTokenBalance))
         // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
 
-        this.BuyTokenUserBalance = ReturnBuyTokenBalance.substring(0, 6) + ' ' + buyTok.TokenSymbol
+        this.TakerTokenUserBalance = ReturnBuyTokenBalance.substring(0, 6) + ' ' + buyTok.TokenSymbol
       } else {
         const BEP20BuyToken = new ethers.Contract(
           buyTok.TokenContract, [
@@ -538,7 +544,7 @@ export default {
         const buyTokenbalance = await BEP20BuyToken.balanceOf(String(account))
         // alert(buyTokenbalance)
         const ReturnBuyTokenbalance = ethers.utils.formatUnits(String(buyTokenbalance), buyTok.TokenDecimal)
-        this.BuyTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + buyTok.TokenSymbol
+        this.TakerTokenUserBalance = ReturnBuyTokenbalance.substring(0, 8) + ' ' + buyTok.TokenSymbol
       }
     }
   }

@@ -1,10 +1,10 @@
 <template>
   <b-container class="text-center">
-    <b-row class="taker-token-container">
+    <b-row class="trade-taker-token-container">
       <b-col class="px-0">
         <div class="ttoken-select-container">
           <b-button
-            class="taker-token-select-btn"
+            class="trade-taker-token-select-btn"
             block
             :change-token="TakerTokenPass"
             :chain-id="chain"
@@ -122,7 +122,7 @@ export default {
 } // END OF EXPORT DEFAULT
 </script>
 <style scoped>
-.taker-token-container {
+.trade-taker-token-container {
   margin-top: 2rem;
   margin-bottom:2rem;
 }
@@ -163,7 +163,7 @@ export default {
   font-weight: 400;
   color: #35A3E0;
 }
-.taker-token-select-btn {
+.trade-taker-token-select-btn {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;
@@ -172,7 +172,7 @@ export default {
   padding: 0.45rem;
   border-radius: 4rem;
   border-color: #FFFFFF;
-  background-color: #c1272d;
+  background-color: #c1272d !important;
 }
 .taker-token-img {
   max-height: 32px;

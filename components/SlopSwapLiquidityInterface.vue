@@ -1,8 +1,8 @@
 <template>
   <b-container class="liquidity-container">
-    <div v-if="TransactionReceipt">
-      <SlopSwapTXReceiptSidebar :receipt-data="TransactionReceipt" />
-    </div>
+    <!--<div v-if="TXreceipt">
+      <SlopSwapTXReceiptSidebar :receipt-data="TXreceipt" />
+    </div>-->
 
     <div>
       <!--<b-button v-b-toggle.sidebar-remove-liquidity>
@@ -412,17 +412,17 @@
               </b-button>
               <SlopSwapTradeConfiguration />
             </b-nav-item>
+            <b-nav-item>
+              <b-button id="TXsidebar1" v-b-toggle.TXsidebar1 pill class="liquidity-nav-btn" variant="none">
+                <i class="fa-solid fa-memo-circle-info" style="color: #3E3D40;" />
+              </b-button>
+              <SlopSwapTXHistory :txreceipt="TXreceipt" />
+            </b-nav-item>
             <b-nav-item active>
               <b-button v-b-toggle.PairSpecifications pill class="liquidity-nav-btn" variant="none">
                 <i class="fa-solid fa-table" style="color: #3E3D40;" />
               </b-button>
               <PairSpecificationSidebar />
-            </b-nav-item>
-            <b-nav-item>
-              <b-button id="TXsidebar1" v-b-toggle.TXsidebar1 pill class="liquidity-nav-btn" variant="none">
-                <i class="fa-solid fa-clock-rotate-left" />
-              </b-button>
-              <SlopSwapTXHistory />
             </b-nav-item>
             <b-nav-item>
               <b-button v-b-toggle.TradingPairGraph pill class="liquidity-nav-btn" variant="none">
@@ -444,8 +444,8 @@
         </div>
       </b-col>
       <b-col sm="12" md="12" lg="2">
-        <div>
-          <b-img src="~/assets/img/page-graphics/liquidity-graphic.svg" class="center-trade-char" fluid alt="Responsive image" />
+        <div class="text-center">
+          <b-img src="~/assets/img/page-graphics/liquidity-graphic.svg" class="text-center center-trade-char" fluid alt="Responsive image" />
           <b-form-select v-model="SlippageSelected" v-b-popover.hover.top="'Slippage is the difference between the expected price of an order and the price when the order actually executes.'" title="What is Slippage?" class="slippage-selector slippage-title" :options="SlippageOptions" />
         </div>
       </b-col>
@@ -457,7 +457,7 @@
         </div>
       </b-col>
       <b-col sm="12" md="12" lg="12">
-        <div class="text-center my-5">
+        <div class="text-center my-3">
           <b-button-group class="my-2">
             <!--<b-button @click="GetTokenReserves()">
               Get Reserves
@@ -494,7 +494,7 @@ import { ChainId, Fetcher, Route, Token, Pair, TokenAmount } from '@uniswap/sdk'
 import detectEthereumProvider from '@metamask/detect-provider'
 import SlopSwapLiquidityMakerTokenSelect from '~/components/SlopSwapMakerTokenSelect.vue'
 import SlopSwapLiquidityTakerTokenSelect from '~/components/SlopSwapTakerTokenSelect.vue'
-import SlopSwapTXReceiptSidebar from '~/components/SlopSwapTXReceiptSidebar.vue'
+import SlopSwapTXHistory from '~/components/SlopSwapTXHistory.vue'
 const axios = require('axios')
 const ethers = require('ethers')
 const qs = require('qs')
@@ -507,7 +507,7 @@ const FACTORY = require('~/static/artifacts/SlopSwapFactory.json')
 export default {
   name: 'SlopSwapLiquidityInterface',
   components: {
-    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect, SlopSwapTXReceiptSidebar
+    SlopSwapLiquidityMakerTokenSelect, SlopSwapLiquidityTakerTokenSelect, SlopSwapTXHistory
   },
   data () {
     return {
@@ -550,7 +550,7 @@ export default {
         { value: 0.25, text: '25% Slip' }
       ],
       liquidityRangeVal: 0,
-      TransactionReceipt: null,
+      TXreceipt: null,
       MakerMidPrice: null,
       TakerMidPrice: null,
       tokenA: null,
@@ -582,9 +582,6 @@ export default {
       CalculatedLiquidityVal: null,
       CurrentGasPrice: null
     }
-  },
-  async fetch () {
-    this.CurrentGasPrice = await this.$http.$get('https://api.bscscan.com/api?module=gastracker&action=gasoracle&apikey=Z7UUPDDWZHFYEJYUI8AJS1YB4SR8NPH8FV')
   },
   watch: {
     liquidityRangeVal (value) {
@@ -738,7 +735,7 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TransactionReceipt = receipt
+        this.TXreceipt = receipt
         this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       } else if (this.TakerToken.TokenContract === this.WETH) {
         // Token + Eth
@@ -756,7 +753,7 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TransactionReceipt = receipt
+        this.TXreceipt = receipt
         this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       } else {
         // Token + Token
@@ -775,7 +772,7 @@ export default {
           }
         )
         const receipt = await tx.wait()
-        this.TransactionReceipt = receipt
+        this.TXreceipt = receipt
         this.$root.$emit('bv::toggle::collapse', 'TXsidebar1')
       }
     },
@@ -1223,10 +1220,10 @@ export default {
       // const provider = new ethers.providers.Web3Provider(window.ethereum)
       const tokenA = new Token(ChainId.MAINNET, this.MakerToken.TokenContract, this.MakerToken.TokenDecimal, this.MakerToken.TokenSymbol, this.MakerToken.TokenName)
       this.tokenA = tokenA
-      alert(tokenA.name)
+      // alert(tokenA.name)
       const tokenB = new Token(ChainId.MAINNET, this.TakerToken.TokenContract, this.TakerToken.TokenDecimal, this.TakerToken.TokenSymbol, this.TakerToken.TokenName)
       this.tokenB = tokenB
-      alert(tokenB.name)
+      // alert(tokenB.name)
 
       const pairAddress = Pair.getAddress(tokenA, tokenB)
       // alert('Pair Address: ' + pairAddress)
@@ -1243,9 +1240,9 @@ export default {
       this.CreatedPair = pair
       const route = new Route([pair], tokenA)
       // alert(route)
-      alert('Route: ' + route)
-      alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
-      alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
+      // alert('Route: ' + route)
+      // alert(`1 ${this.MakerToken.TokenSymbol} equals ` + route.midPrice.toSignificant(6) + ` ${this.TakerToken.TokenSymbol}`) // 201.306
+      // alert(`1 ${this.TakerToken.TokenSymbol} equals ` + route.midPrice.invert().toSignificant(6) + `${this.MakerToken.TokenSymbol}`) // 0.00496756
       this.TakerMidPrice = route.midPrice.toSignificant(10)
     },
     async checkBalance () {
@@ -1425,7 +1422,7 @@ export default {
         const ReturnSellTokenBalance = ethers.utils.formatEther(String(sellTokenBalance))
         // alert('User TokenA Balance: ' + ConvertWeiToEther + ' WBNB')
 
-        this.SellTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + sellTok.TokenSymbol
+        this.MakerTokenUserBalance = ReturnSellTokenBalance.substring(0, 6) + ' ' + sellTok.TokenSymbol
       } else {
         const BEP20sellToken = new ethers.Contract(
           sellTok.TokenContract, [
@@ -1438,7 +1435,7 @@ export default {
         const sellTokenbalance = await BEP20sellToken.balanceOf(String(account))
         // alert(TokenAbalance)
         const ReturnSellTokenbalance = ethers.utils.formatUnits(String(sellTokenbalance), sellTok.TokenDecimal)
-        this.SellTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
+        this.MakerTokenUserBalance = ReturnSellTokenbalance.substring(0, 8) + ' ' + sellTok.TokenSymbol
       }
       const BEP20BuyToken = new ethers.Contract(
         sellTok.TokenContract, [
@@ -1525,34 +1522,6 @@ export default {
   background: rgb(255,255,255);
   background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(46,163,230,1) 20%, rgba(255,158,46,1) 60%);
 }
-.maker-token-select-btn[data-v-66a8d999] {
-    font-family: 'Fredoka One', sans-serif !important;
-    color: #FFFFFF;
-    font-feature-settings: "smcp", "c2sc";
-    font-variant: all-small-caps;
-    font-weight: 500;
-    font-size: 2rem;
-    padding: 0.45rem;
-    margin-right: 0rem;
-    margin-left: 0rem;
-    border-radius: 4rem;
-    border-color: #FFFFFF;
-    background-color: #5d3d42 !important;
-}
-.mtoken-select-container .maker-token-select-btn[data-v-66a8d999] {
-    font-family: 'Fredoka One', sans-serif !important;
-    color: #FFFFFF;
-    font-feature-settings: "smcp", "c2sc";
-    font-variant: all-small-caps;
-    font-weight: 500;
-    font-size: 2rem;
-    padding: 0.45rem;
-    margin-right: 0rem;
-    margin-left: 0rem;
-    border-radius: 4rem;
-    border-color: #FFFFFF;
-    background-color: #5d3d42 !important;
-}
 .main-title {
   font-variant-caps: all-small-caps;
   font-weight: 600;
@@ -1573,7 +1542,7 @@ label.range-slider-instructions {
 .left-liq-btn {
   border-top-left-radius: 4rem;
   border-bottom-left-radius: 4rem;
-  background-color: #5d3d42;
+  background-color: #212529;
 }
 .input-group-lg > .input-group-prepend > .btn, .input-group-lg > .input-group-append > .btn {
     padding: 0.5rem 1rem;
@@ -1636,6 +1605,9 @@ label.range-slider-instructions {
   height: 26px;
   min-width: 75px;
 }
+.center-trade-char {
+  max-width: 200px;
+}
 .liquidity-container {
   font-variant-caps: all-small-caps;
   font-family: 'Fredoka One', sans-serif;
@@ -1682,7 +1654,7 @@ label.range-slider-instructions {
   border-bottom-left-radius: 4rem;
   font-variant-caps: all-small-caps;
   font-size: 0.85rem;
-  background-color: #5d3d42;
+  background-color: #212529;
   padding: 1rem;
 }
 .right-group-btn {
@@ -1690,11 +1662,11 @@ label.range-slider-instructions {
   border-bottom-right-radius: 4rem;
   font-variant-caps: all-small-caps;
   font-size: 0.85rem;
-  background-color: #5d3d42
+  background-color: #212529;
 }
 .remove-liquidity-btn {
   font-variant-caps: all-small-caps;
   font-size: 0.85rem;
-  background-color: #5d3d42
+  background-color: #212529;
 }
 </style>

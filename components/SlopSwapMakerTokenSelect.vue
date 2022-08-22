@@ -4,7 +4,7 @@
       <b-col class="px-0">
         <div class="mtoken-select-container mx-0">
           <b-button
-            class="maker-token-select-btn"
+            class="trade-maker-token-select-btn"
             block
             :change-token="MakerTokenPass"
             :chain-id="chain"
@@ -192,7 +192,7 @@ export default {
   font-weight: 400;
   color: #35A3E0;
 }
-.maker-token-select-btn {
+.trade-maker-token-select-btn {
   font-family: 'Fredoka One', sans-serif !important;
   color: #FFFFFF;
   font-variant: all-small-caps;
@@ -203,7 +203,7 @@ export default {
   margin-left: 0rem;
   border-radius: 4rem;
   border-color: #FFFFFF;
-  background-color: #c1272d;
+  background-color: #c1272d !important;
   /*background-image: url(~/assets/img/page-graphics/dark-gray-splatter.png);
   background-position: top left;
   background-size: 70%;*/
