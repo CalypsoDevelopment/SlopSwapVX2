@@ -25,6 +25,37 @@
                   <span class="purple">Slop</span>Swap <span class="purple">Liquidity Removal</span>
                 </h1>
               </b-col>
+              <b-col sm="12" md="12" lg="12">
+                <b-nav class="config-btns">
+                  <b-nav-item active>
+                    <b-button v-b-toggle.TXSettingsConfig pill class="liquidity-nav-btn" variant="none">
+                      <i class="fa-solid fa-gears" style="color: #3E3D40;" />
+                    </b-button>
+                    <SlopSwapTradeConfiguration />
+                  </b-nav-item>
+                  <b-nav-item active>
+                    <b-button v-b-toggle.PairSpecifications pill class="liquidity-nav-btn" variant="none">
+                      <i class="fa-solid fa-table" style="color: #3E3D40;" />
+                    </b-button>
+                    <PairSpecificationSidebar />
+                  </b-nav-item>
+                  <b-nav-item>
+                    <b-button id="TXsidebar1" v-b-toggle.TXsidebar1 pill class="liquidity-nav-btn" variant="none">
+                      <i class="fa-solid fa-clock-rotate-left" />
+                    </b-button>
+                    <SlopSwapTXHistory />
+                  </b-nav-item>
+                  <b-nav-item>
+                    <b-button v-b-toggle.TradingPairGraph pill class="liquidity-nav-btn" variant="none">
+                      <i class="fa-solid fa-chart-area" style="color: #3E3D40;" />
+                    </b-button>
+                    <SlopSwapPairGraphSidebar />
+                  </b-nav-item>
+                  <b-nav-item>
+                    <b-form-select v-model="SlippageSelected" class="slippage-selector slippage-title" :options="SlippageOptions" />
+                  </b-nav-item>
+                </b-nav>
+              </b-col>
               <b-col sm="12" md="12" lg="6">
                 <div class="my-3">
                   <b-img
@@ -95,7 +126,9 @@
                   </b-input-group>
                 </div>
               </b-col>
-
+              <b-col sm="12" md="12" lg="12">
+                <label class="range-slider-instructions" for="range-1"><i class="fa-solid fa-circle-2" /> The Quoted Amount You will Receive For Providing Liquidity</label>
+              </b-col>
               <b-col sm="12" md="12" lg="6">
                 <div>
                   <b-input-group
@@ -152,14 +185,23 @@
 
               <b-col sm="12" md="12" lg="12">
                 <div class="text-center my-3">
-                  <b-button-group class="">
+                  <!--<b-button-group class="">
                     <b-button size="lg" class="left-group-btn" style="background-color: #5d3d42" @click="removeLiquidityQuote()">
                       Remove Liquidity Quote!
                     </b-button>
                     <b-button size="lg" class="right-group-btn" @click="removeLiquidity()">
                       Remove Liquidity!
                     </b-button>
-                  </b-button-group>
+                  </b-button-group>-->
+                  <b-button
+                    pill
+                    block
+                    size="lg"
+                    class=""
+                    @click="removeLiquidity()"
+                  >
+                    Remove {{ CalculatedLiquidityVal }} Liquidity!
+                  </b-button>
                 </div>
               </b-col>
 
@@ -347,7 +389,7 @@
         </div>
         <template #footer="{ hide }">
           <div class="d-flex bg-dark text-light align-items-center px-3 py-2">
-            <strong class="mr-auto">Footer</strong>
+            <strong class="mr-auto">SlopSwap eXchange</strong>
             <b-button size="sm" @click="hide">
               Close
             </b-button>
@@ -535,10 +577,14 @@ export default {
       UserFormattedLPTokens: null,
       Aout: null,
       Bout: null,
-      liquidityAmount: null,
+      UserLiquidityBalanceRaw: null,
       SliderPercentDisplay: null,
-      CalculatedLiquidityVal: null
+      CalculatedLiquidityVal: null,
+      CurrentGasPrice: null
     }
+  },
+  async fetch () {
+    this.CurrentGasPrice = await this.$http.$get('https://api.bscscan.com/api?module=gastracker&action=gasoracle&apikey=Z7UUPDDWZHFYEJYUI8AJS1YB4SR8NPH8FV')
   },
   watch: {
     liquidityRangeVal (value) {
@@ -830,23 +876,28 @@ export default {
     //    `provider` - The current provider
     //    `signer` - The current signer
     async removeLiquidity () {
-      const address1 = this.tokenA.address
-      const address2 = this.tokenB.address
+      const address1 = this.CreatedPair.tokenAmounts[0].token.address
+      const address2 = this.CreatedPair.tokenAmounts[1].token.address
+      const liquidity = ethers.utils.parseEther(String(this.CalculatedLiquidityVal))
 
-      const pairAddress = await this.factory.getPair(address1, address2)
-      const pair = new ethers.Contract(String(pairAddress), PAIR.abi, this.signer)
-      this.pair = pair
-      const LiquidityTokenBlance = await this.pair.balanceOf(this.account)
-      alert('Liquidity Balance' + LiquidityTokenBlance)
-      const liquidity = ethers.utils.formatEther(String(LiquidityTokenBlance))
-      alert('User Liquidity Token Balance: ' + liquidity)
-      /* const amount1Min = ethers.utils.parseEther(amount1min.toString())
-      const amount2Min = ethers.utils.parseEther(amount2min.toString())
+      const valueInA = ethers.utils.parseEther(this.Aout)
+      const numA = parseFloat(valueInA)
+      const valA = numA - (numA * this.SlippageSelected)
+
+      const valueInB = ethers.utils.parseEther(this.Bout)
+      const numB = parseFloat(valueInB)
+      const valB = numB - (numB * this.SlippageSelected)
+
+      const amount1Min = ethers.utils.parseEther(String(valA))
+      const amount2Min = ethers.utils.parseEther(String(valB))
 
       const time = Math.floor(Date.now() / 1000) + 200000
       const deadline = ethers.BigNumber.from(time)
 
-      await pair.approve(routerContract.address, liquidity)
+      const pairAddress = await this.factory.getPair(address1, address2)
+      const pair = new ethers.Contract(pairAddress, PAIR.abi, this.signer)
+
+      await pair.approve(this.MainnetRouter, liquidity)
 
       alert([
         address1,
@@ -854,42 +905,54 @@ export default {
         Number(liquidity),
         Number(amount1Min),
         Number(amount2Min),
-        this.account,
-        deadline
+        this.$dataaccount,
+        deadline,
+        {
+          gasLimit: '550000'
+        }
       ])
 
       if (address1 === this.WETH) {
         // Eth + Token
-        await routerContract.removeLiquidityETH(
+        await this.router.removeLiquidityETH(
           address2,
           liquidity,
           amount2Min,
           amount1Min,
           this.account,
-          deadline
+          deadline,
+          {
+            gasLimit: '550000'
+          }
         )
       } else if (address2 === this.WETH) {
         // Token + Eth
-        await routerContract.removeLiquidityETH(
+        await this.router.removeLiquidityETH(
           address1,
           liquidity,
           amount1Min,
           amount2Min,
           this.account,
-          deadline
+          deadline,
+          {
+            gasLimit: '550000'
+          }
         )
       } else {
         // Token + Token
-        await routerContract.removeLiquidity(
+        await this.router.removeLiquidity(
           address1,
           address2,
           liquidity,
           amount1Min,
           amount2Min,
           this.account,
-          deadline
+          deadline,
+          {
+            gasLimit: '550000'
+          }
         )
-      } */
+      }
     },
     /* async removeLiquidity (
       address1,
@@ -1311,6 +1374,12 @@ export default {
       this.TokenBPairAmount = null
       this.TokenBPairAmount = null
       this.BuyTokenAmount = null
+      this.UserFormattedLPTokens = null
+      this.Aout = null
+      this.Bout = null
+      this.UserLiquidityBalanceRaw = null
+      this.SliderPercentDisplay = null
+      this.CalculatedLiquidityVal = null
       this.ChangePairMidPrice()
     },
     ChangeBuyToken (TakerToken) {
@@ -1320,6 +1389,12 @@ export default {
       this.TokenBPairAmount = null
       this.TokenBPairAmount = null
       this.BuyTokenAmount = null
+      this.UserFormattedLPTokens = null
+      this.Aout = null
+      this.Bout = null
+      this.UserLiquidityBalanceRaw = null
+      this.SliderPercentDisplay = null
+      this.CalculatedLiquidityVal = null
       this.ChangePairMidPrice()
     },
     async MakerReCheckBalance (sellTok) {
